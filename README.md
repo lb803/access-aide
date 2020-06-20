@@ -6,15 +6,14 @@ This project is a port of the [Access-Aide](https://github.com/kevinhendricks/Ac
 The _Access Aide_ plugin for Calibre is at a very early developmental stage.
 
 # Features
- -  Add 'en-GB' language declaration to `<html>` tags.
+ -  Add language declaration to `<html>` tags.
 
 # Coming features
- -  Retrieve book language from book metadata;
  -  Add in appropriate epub:type semantic tags;
  -  Map epub:type attributes to their appropriate aria role attribute;
  -  Add accessibility declarations to book metadata.
 
-# Licence
+# License
 Source code by Luca Baffa, released under the GPL 3 licence.
 
-The plugin icon (`./icon/icon.png`) comes from the `adwaita-icon-theme` pack ([gitlab page](https://gitlab.gnome.org/GNOME/adwaita-icon-theme) of the project), released as CC SA 3.0 by the GNOME Project.
+The plugin icon (`./icon/icon.png`) comes from the `adwaita-icon-theme` pack ([gitlab page](https://gitlab.gnome.org/GNOME/adwaita-icon-theme) of the project), released as LGPL v3 by the GNOME Project.

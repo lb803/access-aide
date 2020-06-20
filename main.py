@@ -34,8 +34,8 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
-        # TODO Parse book metadata and find book language
-        lang = 'en-GB'
+        # get the book main language
+        lang = self.get_lang(container)
         
         # iterate over book files
         for name, media_type in container.mime_map.items():
@@ -47,6 +47,22 @@ class AccessAide(Tool):
                 self.add_lang(container.parsed(name), lang)
 
                 container.dirty(name)
+
+    def get_lang(self, container):
+        '''
+        This method parses the OPF file, gets a list of the declared
+        languages and returns the first one (which we trust to be the
+        main language of the book)
+        '''
+
+        languages = container.opf_xpath('//dc:language/text()')
+
+        if not languages:
+            return error_dialog(self.gui, 'No language declaration for book',
+                                'The OPF file does not report language info.',
+                                show=True)
+
+        return languages[0]
 
     def add_lang(self, root, lang):
         '''
