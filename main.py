@@ -1,4 +1,5 @@
 import lxml.etree
+import json
 from PyQt5.Qt import QAction, QInputDialog
 
 # The base class that all tools must inherit from
@@ -27,7 +28,7 @@ class AccessAide(Tool):
     def main(self):
         # create a restore point
         self.boss.add_savepoint('Before: Access Aide')
-        
+
         container = self.current_container
 
         if not container:
@@ -36,7 +37,10 @@ class AccessAide(Tool):
 
         # get the book main language
         lang = self.get_lang(container)
-        
+
+        # load a map to navigate epub-types and aria roles
+        self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
+
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
@@ -47,6 +51,14 @@ class AccessAide(Tool):
                 self.add_lang(container.parsed(name), lang)
 
                 container.dirty(name)
+
+    def load_json(self, path):
+        '''
+        This method loads a json file from the given path
+        '''
+
+        with open(path) as json_file:
+            return json.load(json_file)
 
     def get_lang(self, container):
         '''
