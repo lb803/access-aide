@@ -50,6 +50,9 @@ class AccessAide(Tool):
                 # set language to <html> tags
                 self.add_lang(container.parsed(name), lang)
 
+                # add aria roles
+                self.add_aria(container.parsed(name))
+
                 container.dirty(name)
 
     def load_json(self, path):
@@ -88,3 +91,30 @@ class AccessAide(Tool):
         # set lang for 'lang' and 'xml:lang' attributes
         html.attrib['lang'] = lang
         html.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = lang
+
+    def add_aria(self, root):
+        '''
+        This method finds epub style attributes and adds appropriate
+        aria roles.
+        '''
+
+        # iter through epub types
+        for epub_type, value in self.epubtype_aria_map.iteritems():
+
+            # iter through HTML tags
+            for tag in value['tag']:
+
+                # compose paths
+                path = '//*{tag}[contains(@{attribute}, "{value}")]' \
+                       .format(**{'tag': '[local-name()="{}"]'.format(tag) \
+                                         if tag else '',
+                                  'attribute': 'epub:type',
+                                  'value': epub_type})
+
+                node = root.xpath(path,
+                       namespaces={'epub':'http://www.idpf.org/2007/ops'})
+
+                # debug
+                if node:
+                    for i in node:
+                        print('found {}'.format(path))
