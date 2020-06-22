@@ -111,10 +111,20 @@ class AccessAide(Tool):
                                   'attribute': 'epub:type',
                                   'value': epub_type})
 
-                node = root.xpath(path,
-                       namespaces={'epub':'http://www.idpf.org/2007/ops'})
+                nodes = root.xpath(path,
+                        namespaces={'epub':'http://www.idpf.org/2007/ops'})
 
-                # debug
-                if node:
-                    for i in node:
-                        print('found {}'.format(path))
+                # if nodes are found
+                if nodes:
+
+                    # iter over the nodes
+                    for node in nodes:
+                        self.write_attrib(node, 'aria', value['role'])
+
+    def write_attrib(self, node, attribute, value):
+        '''
+        This method writes attributes to nodes.
+        '''
+
+        node.attrib[attribute] = value
+
