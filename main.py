@@ -93,8 +93,9 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' and 'xml:lang' attributes
-        html.attrib['lang'] = lang
-        html.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = lang
+        self.write_attrib(html, 'lang', lang)
+        self.write_attrib(html,
+                          '{http://www.w3.org/XML/1998/namespace}lang', lang)
 
     def add_aria(self, root):
         '''
