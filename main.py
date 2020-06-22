@@ -105,7 +105,7 @@ class AccessAide(Tool):
             for tag in value['tag']:
 
                 # compose paths
-                path = '//*{tag}[contains(@{attribute}, "{value}")]' \
+                path = '//*{tag}[@{attribute} = "{value}"]' \
                        .format(**{'tag': '[local-name()="{}"]'.format(tag) \
                                          if tag else '',
                                   'attribute': 'epub:type',
