@@ -35,6 +35,10 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
+        # override existing attributes
+        # in future releases, we could have this set via plugin preferences
+        self.force_override = False
+
         # get the book main language
         lang = self.get_lang(container)
 
@@ -124,7 +128,15 @@ class AccessAide(Tool):
     def write_attrib(self, node, attribute, value):
         '''
         This method writes attributes to nodes.
+
+        A preliminary check is performed, in the spirit of keeping
+        changes to the original document to a minimum.
         '''
 
-        node.attrib[attribute] = value
+        # skip if force_override is not set and attribute is already set
+        if self.force_override == False \
+           and attribute in node.attrib:
 
+            return
+
+        node.attrib[attribute] = value
