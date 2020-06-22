@@ -11,7 +11,7 @@ So that, this fragment of this json file:
 ```
 [...]
     "acknowledgments" : {"tag": ["section"],
-                         "role": "doc-acknowledgments"},
+                         "aria": "doc-acknowledgments"},
 [...]
 ```
 

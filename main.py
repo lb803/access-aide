@@ -119,7 +119,7 @@ class AccessAide(Tool):
 
                     # iter over the nodes
                     for node in nodes:
-                        self.write_attrib(node, 'aria', value['role'])
+                        self.write_attrib(node, 'aria', value['aria'])
 
     def write_attrib(self, node, attribute, value):
         '''

@@ -1,142 +1,142 @@
 {
     "abstract"        : {"tag": ["section"],
-                         "role": "doc-abstract"},
+                         "aria": "doc-abstract"},
 
     "acknowledgments" : {"tag": ["section"],
-                         "role": "doc-acknowledgments"},
+                         "aria": "doc-acknowledgments"},
 
     "afterword"       : {"tag": ["section"],
-                         "role": "doc-afterword"},
+                         "aria": "doc-afterword"},
 
     "appendix"        : {"tag": ["section"],
-                         "role": "doc-appendix"},
+                         "aria": "doc-appendix"},
 
     "biblioentry"     : {"tag": ["li"],
-                         "role": "doc-biblioentry"},
+                         "aria": "doc-biblioentry"},
 
     "bibliography"    : {"tag": ["section"],
-                         "role": "doc-bibliography"},
+                         "aria": "doc-bibliography"},
 
     "biblioref"       : {"tag": ["a"],
-                         "role": "doc-biblioref"},
+                         "aria": "doc-biblioref"},
 
     "chapter"         : {"tag": ["section"],
-                         "role": "doc-chapter"},
+                         "aria": "doc-chapter"},
 
     "colophon"        : {"tag": ["section"],
-                         "role": "doc-colophon"},
+                         "aria": "doc-colophon"},
 
     "conclusion"      : {"tag": ["section"],
-                         "role": "doc-conclusion"},
+                         "aria": "doc-conclusion"},
 
     "cover-image"     : {"tag": ["img"],
-                         "role": "doc-cover"},
+                         "aria": "doc-cover"},
 
     "credit"          : {"tag": ["section"],
-                         "role": "doc-credit"},
+                         "aria": "doc-credit"},
 
     "credits"         : {"tag": ["section"],
-                         "role": "doc-credits"},
+                         "aria": "doc-credits"},
 
     "dedication"      : {"tag": ["section"],
-                         "role": "doc-dedication"},
+                         "aria": "doc-dedication"},
 
     "endnote"         : {"tag": ["li"],
-                         "role": "doc-endnote"},
+                         "aria": "doc-endnote"},
 
     "endnotes"        : {"tag": ["section"],
-                         "role": "doc-endnotes"},
+                         "aria": "doc-endnotes"},
 
     "epigraph"        : {"tag": ["section"],
-                         "role": "doc-epigraph"},
+                         "aria": "doc-epigraph"},
 
     "epilogue"        : {"tag": ["section"],
-                         "role": "doc-epilogue"},
+                         "aria": "doc-epilogue"},
 
     "errata"          : {"tag": ["section"],
-                         "role": "doc-errata"},
+                         "aria": "doc-errata"},
 
     "figure"          : {"tag": ["figure"],
-                         "role": "figure"},
+                         "aria": "figure"},
 
     "footnote"        : {"tag": ["aside", "footer", "header"],
-                         "role": "doc-footnote"},
+                         "aria": "doc-footnote"},
 
     "foreword"        : {"tag": ["section"],
-                         "role": "doc-foreword"},
+                         "aria": "doc-foreword"},
 
     "glossary"        : {"tag": ["section"],
-                         "role": "doc-glossary"},
+                         "aria": "doc-glossary"},
 
     "glossdef"        : {"tag": [""],
-                         "role": "definition"},
+                         "aria": "definition"},
 
     "glossref"        : {"tag": ["a"],
-                         "role": "doc-glossref"},
+                         "aria": "doc-glossref"},
 
     "glossterm"       : {"tag": [""],
-                         "role": "term"},
+                         "aria": "term"},
 
     "index"           : {"tag": ["section", "nav"],
-                         "role": "doc-index"},
+                         "aria": "doc-index"},
 
     "introduction"    : {"tag": ["section"],
-                         "role": "doc-introduction"},
+                         "aria": "doc-introduction"},
 
     "landmarks"       : {"tag": ["ol", "ul"],
-                         "role": "directory"},
+                         "aria": "directory"},
 
     "list"            : {"tag": [""],
-                         "role": "list"},
+                         "aria": "list"},
 
     "list-item"       : {"tag": [""],
-                         "role": "listitem"},
+                         "aria": "listitem"},
 
     "noteref"         : {"tag": ["a"],
-                         "role": "doc-noteref"},
+                         "aria": "doc-noteref"},
 
     "notice"          : {"tag": ["section"],
-                         "role": "doc-notice"},
+                         "aria": "doc-notice"},
 
     "page-list"       : {"tag": ["section", "nav"],
-                         "role": "doc-pagelist"},
+                         "aria": "doc-pagelist"},
 
     "pagebreak"       : {"tag": ["hr"],
-                         "role": "doc-pagebreak"},
+                         "aria": "doc-pagebreak"},
 
     "part"            : {"tag": ["section"],
-                         "role": "doc-part"},
+                         "aria": "doc-part"},
 
     "preface"         : {"tag": ["section"],
-                         "role": "doc-preface"},
+                         "aria": "doc-preface"},
 
     "prologue"        : {"tag": ["section"],
-                         "role": "doc-prologue"},
+                         "aria": "doc-prologue"},
 
     "pullquote"       : {"tag": ["section", "aside"],
-                         "role": "doc-pullquote"},
+                         "aria": "doc-pullquote"},
 
     "qna"             : {"tag": ["section"],
-                         "role": "doc-qna"},
+                         "aria": "doc-qna"},
 
     "referrer"        : {"tag": ["a"],
-                         "role": "doc-backlink"},
+                         "aria": "doc-backlink"},
 
     "subtitle"        : {"tag": ["h1", "h2", "h3", "h4", "h5", "h6"],
-                         "role": "doc-subtitle"},
+                         "aria": "doc-subtitle"},
 
     "table"           : {"tag": [""],
-                         "role": "table"},
+                         "aria": "table"},
 
     "table-row"       : {"tag": [""],
-                         "role": "row"},
+                         "aria": "row"},
 
     "table-cell"      : {"tag": [""],
-                         "role": "cell"},
+                         "aria": "cell"},
 
     "tip"             : {"tag": ["aside"],
-                         "role": "doc-tip"},
+                         "aria": "doc-tip"},
 
     "toc"             : {"tag": ["section", "nav"],
-                         "role": "doc-toc"}
+                         "aria": "doc-toc"}
 }
