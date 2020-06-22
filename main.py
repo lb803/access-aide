@@ -6,7 +6,7 @@ from PyQt5.Qt import QAction, QInputDialog
 from calibre.gui2.tweak_book.plugin import Tool
 
 from calibre import force_unicode
-from calibre.gui2 import error_dialog
+from calibre.gui2 import error_dialog, info_dialog
 from calibre.ebooks.oeb.polish.container import OEB_DOCS, serialize
 
 
@@ -59,6 +59,9 @@ class AccessAide(Tool):
 
                 container.dirty(name)
 
+        info_dialog(self.gui, 'Access Aide',
+                    'Routine completed.', show=True)
+
     def load_json(self, path):
         '''
         This method loads a json file from the given path
@@ -77,7 +80,7 @@ class AccessAide(Tool):
         languages = container.opf_xpath('//dc:language/text()')
 
         if not languages:
-            return error_dialog(self.gui, 'No language declaration for book',
+            return error_dialog(self.gui, 'Access Aide',
                                 'The OPF file does not report language info.',
                                 show=True)
 
