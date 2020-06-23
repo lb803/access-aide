@@ -100,11 +100,14 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' and 'xml:lang' attributes
-        if self.write_attrib(html, 'lang', lang) and \
-           self.write_attrib(html,
-                '{http://www.w3.org/XML/1998/namespace}lang', lang):
+        if self.write_attrib(html, 'lang', lang):
 
             # if successful, increment the stat counter
+            self.lang_tag += 1
+
+        if self.write_attrib(html,
+                '{http://www.w3.org/XML/1998/namespace}lang', lang):
+
             self.lang_tag += 1
 
     def add_aria(self, root):
@@ -159,7 +162,7 @@ class AccessAide(Tool):
 
     def display_info(self):
         '''
-        This method display an info dialogue
+        This method displays an info dialogue.
         '''
 
         message = ('<h3>Routine completed</h3>'
