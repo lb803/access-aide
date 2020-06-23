@@ -102,32 +102,32 @@ class AccessAide(Tool):
 
     def add_aria(self, root):
         '''
-        This method finds epub style attributes and adds appropriate
-        aria roles.
+        This method finds nodes with epub style attributes
+        and adds aria roles appropriately.
         '''
 
-        # iter through epub types
-        for epub_type, value in self.epubtype_aria_map.iteritems():
+        # find nodes with  an 'epub:type' attribute
+        nodes = root.xpath('//*[@epub:type]',
+                           namespaces={'epub':'http://www.idpf.org/2007/ops'})
 
-            # iter through HTML tags
-            for tag in value['tag']:
+        # iter through nodes
+        for node in nodes:
 
-                # compose paths
-                path = '//*{tag}[@{attribute} = "{value}"]' \
-                       .format(**{'tag': '[local-name()="{}"]'.format(tag) \
-                                         if tag else '',
-                                  'attribute': 'epub:type',
-                                  'value': epub_type})
+            tag = lxml.etree.QName(node).localname
+            value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
-                nodes = root.xpath(path,
-                        namespaces={'epub':'http://www.idpf.org/2007/ops'})
+            # get map for the 'value' key
+            map = self.epubtype_aria_map.get(value, None)
 
-                # if nodes are found
-                if nodes:
+            # skip if the epub type is not mapped
+            if map == None:
+                continue
 
-                    # iter over the nodes
-                    for node in nodes:
-                        self.write_attrib(node, 'aria', value['aria'])
+            # if the tag of the node is allowed
+            if tag in map['tag']:
+
+                # write the aria role to the note
+                self.write_attrib(node, 'aria', map['aria'])
 
     def write_attrib(self, node, attribute, value):
         '''
