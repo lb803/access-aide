@@ -39,6 +39,10 @@ class AccessAide(Tool):
         # in future releases, we could have this set via plugin preferences
         self.force_override = False
 
+        # Stats
+        self.lang_tag = 0
+        self.aria_match = 0
+
         # get the book main language
         lang = self.get_lang(container)
 
@@ -59,8 +63,8 @@ class AccessAide(Tool):
 
                 container.dirty(name)
 
-        info_dialog(self.gui, 'Access Aide',
-                    'Routine completed.', show=True)
+        # display info dialogue
+        self.display_info()
 
     def load_json(self, path):
         '''
@@ -96,9 +100,12 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' and 'xml:lang' attributes
-        self.write_attrib(html, 'lang', lang)
-        self.write_attrib(html,
-                          '{http://www.w3.org/XML/1998/namespace}lang', lang)
+        if self.write_attrib(html, 'lang', lang) and \
+           self.write_attrib(html,
+                '{http://www.w3.org/XML/1998/namespace}lang', lang):
+
+            # if successful, increment the stat counter
+            self.lang_tag += 1
 
     def add_aria(self, root):
         '''
@@ -121,13 +128,16 @@ class AccessAide(Tool):
 
             # skip if the epub type is not mapped
             if map == None:
+
                 continue
 
             # if the tag of the node is allowed
-            if tag in map['tag']:
+            # and write the aria role to the node is successful
+            if tag in map['tag'] and \
+               self.write_attrib(node, 'aria', map['aria']):
 
-                # write the aria role to the note
-                self.write_attrib(node, 'aria', map['aria'])
+                # if successful, increment the stat counter
+                self.aria_match += 1
 
     def write_attrib(self, node, attribute, value):
         '''
@@ -141,6 +151,22 @@ class AccessAide(Tool):
         if self.force_override == False \
            and attribute in node.attrib:
 
-            return
+            return False
 
         node.attrib[attribute] = value
+
+        return True
+
+    def display_info(self):
+        '''
+        This method display an info dialogue
+        '''
+
+        message = ('<h3>Routine completed</h3>'
+                   '<p>Language attributes added: {lang_tag}<br>'
+                   'Aria roles added: {aria_match}</p>') \
+                   .format(**{'lang_tag': self.lang_tag,
+                              'aria_match': self.aria_match})
+
+        info_dialog(self.gui, 'Access Aide',
+                    message, show=True)
