@@ -64,11 +64,11 @@ class AccessAide(Tool):
 
     def load_json(self, path):
         '''
-        This method loads a json file from the given path
+        This method loads a json file stored inside the plugin
+        given its relative path
         '''
 
-        with open(path) as json_file:
-            return json.load(json_file)
+        return json.loads(get_resources(path))
 
     def get_lang(self, container):
         '''
