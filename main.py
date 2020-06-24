@@ -1,13 +1,13 @@
 import lxml.etree
 import json
-from PyQt5.Qt import QAction, QInputDialog
+from PyQt5.Qt import QAction
 
 # The base class that all tools must inherit from
 from calibre.gui2.tweak_book.plugin import Tool
 
 from calibre import force_unicode
 from calibre.gui2 import error_dialog, info_dialog
-from calibre.ebooks.oeb.polish.container import OEB_DOCS, serialize
+from calibre.ebooks.oeb.polish.container import OEB_DOCS
 
 
 class AccessAide(Tool):
@@ -36,10 +36,10 @@ class AccessAide(Tool):
                                 'Need to have a book open first', show=True)
 
         # override existing attributes
-        # in future releases, we could have this set via plugin preferences
+        # TODO we could have this set via plugin preferences
         self.force_override = False
 
-        # Stats
+        # Stat counters
         self.lang_tag = 0
         self.aria_match = 0
 
@@ -70,18 +70,20 @@ class AccessAide(Tool):
         self.display_info()
 
     def load_json(self, path):
-        '''
+        '''Load a JSON file.
+
         This method loads a json file stored inside the plugin
-        given its relative path
+        given its relative path. The method returns a python object.
         '''
 
         return json.loads(get_resources(path))
 
     def get_lang(self, container):
-        '''
+        '''Retrieve book main language.
+
         This method parses the OPF file, gets a list of the declared
         languages and returns the first one (which we trust to be the
-        main language of the book)
+        main language of the book).
         '''
 
         languages = container.opf_xpath('//dc:language/text()')
@@ -94,36 +96,40 @@ class AccessAide(Tool):
         return languages[0]
 
     def add_lang(self, root, lang):
-        '''
+        '''Add language attributes to <html> tags.
+
         This method finds the <html> tag of the given 'root' element
-        and adds language declarations.
+        and adds language declarations. Changes are tracked and successes
+        increase a stat counter.
         '''
 
-        # get the "first" <html> tag
         html = root.xpath('//*[local-name()="html"]')[0]
 
-        # set lang for 'lang' and 'xml:lang' attributes
+        # set lang for 'lang' attribute
         if self.write_attrib(html, 'lang', lang):
 
-            # if successful, increment the stat counter
             self.lang_tag += 1
 
+        # set lang for 'xml:lang' attribute
         if self.write_attrib(html,
                 '{http://www.w3.org/XML/1998/namespace}lang', lang):
 
             self.lang_tag += 1
 
     def add_aria(self, root):
-        '''
-        This method finds nodes with epub style attributes
+        '''Add aria roles.
+
+        This method finds nodes with epub:type attributes
         and adds aria roles appropriately.
+        Before adding the new aria role, the node tag is checked against 
+        a given list of possible tags and a list of allowed extra tags. Please,
+        refer to the documentation in the `./assets/` folder for more on this.
         '''
 
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
                            namespaces={'epub':'http://www.idpf.org/2007/ops'})
 
-        # iter through nodes
         for node in nodes:
 
             tag = lxml.etree.QName(node).localname
@@ -137,17 +143,15 @@ class AccessAide(Tool):
 
                 continue
 
-            # if the tag of the node is allowed
-            # and write the aria role to the node is successful
-            if (tag in map['tag'] or tag in self.extra_tags) \
-               and self.write_attrib(node, 'aria', map['aria']):
+            # if the tag on 'node' is allowed
+            if tag in map['tag'] or tag in self.extra_tags:
 
-                # if successful, increment the stat counter
-                self.aria_match += 1
+                if self.write_attrib(node, 'aria', map['aria']):
+
+                    self.aria_match += 1
 
     def write_attrib(self, node, attribute, value):
-        '''
-        This method writes attributes to nodes.
+        '''Write attributes to nodes.
 
         A preliminary check is performed, in the spirit of keeping
         changes to the original document to a minimum.
@@ -164,8 +168,10 @@ class AccessAide(Tool):
         return True
 
     def display_info(self):
-        '''
-        This method displays an info dialogue.
+        '''Display an info dialogue.
+
+        This method composes and shows an info dialogue to display at the end of
+        runtime along with some statistics.
         '''
 
         message = ('<h3>Routine completed</h3>'
