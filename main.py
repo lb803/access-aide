@@ -49,6 +49,9 @@ class AccessAide(Tool):
         # load a map to navigate epub-types and aria roles
         self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
 
+        # load a list of extra tags
+        self.extra_tags = self.load_json('assets/extra-tags.json')
+
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
@@ -136,8 +139,8 @@ class AccessAide(Tool):
 
             # if the tag of the node is allowed
             # and write the aria role to the node is successful
-            if tag in map['tag'] and \
-               self.write_attrib(node, 'aria', map['aria']):
+            if (tag in map['tag'] or tag in self.extra_tags) \
+               and self.write_attrib(node, 'aria', map['aria']):
 
                 # if successful, increment the stat counter
                 self.aria_match += 1
