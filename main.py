@@ -199,18 +199,30 @@ class AccessAide(Tool):
 
         metadata = container.opf_xpath('//opf:metadata')[0]
 
-        if self.config.get('epub_type', None) == 'epub3':
+        meta = self.config.get('meta_tags', None)
 
-            meta = self.config.get('meta_tags', None)
+        for value in meta:
 
-            for value in meta:
+            for text in meta[value]:
 
-                for text in meta[value]:
+                # if epub3
+                if '3.' in container.opf_version:
 
                     element = lxml.etree.Element('meta')
                     element.set('property', ('schema:' + value))
                     element.text = text
 
-                    container.insert_into_xml(metadata, element)
+                # if epub2
+                elif '2.' in container.opf_version:
+
+                    element = lxml.etree.Element('meta')
+                    element.set('name', ('schema:' + value))
+                    element.set('content', text)
+
+                else:
+
+                    return
+
+                container.insert_into_xml(metadata, element)
 
             container.dirty(container.opf_name)
