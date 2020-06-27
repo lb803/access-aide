@@ -42,6 +42,7 @@ class AccessAide(Tool):
         # Stat counters
         self.lang_tag = 0
         self.aria_match = 0
+        self.meta_decl = 0
 
         # get the book main language
         lang = self.get_lang(container)
@@ -51,6 +52,13 @@ class AccessAide(Tool):
 
         # load a list of extra tags
         self.extra_tags = self.load_json('assets/extra-tags.json')
+
+        # load config data
+        # TODO: in the future, we could have this set by user via GUI
+        self.config = self.load_json('config.json')
+
+        # add metadata to OPF file
+        self.add_metadata(container)
 
         # iterate over book files
         for name, media_type in container.mime_map.items():
@@ -121,7 +129,7 @@ class AccessAide(Tool):
 
         This method finds nodes with epub:type attributes
         and adds aria roles appropriately.
-        Before adding the new aria role, the node tag is checked against 
+        Before adding the new aria role, the node tag is checked against
         a given list of possible tags and a list of allowed extra tags. Please,
         refer to the documentation in the `./assets/` folder for more on this.
         '''
@@ -176,9 +184,66 @@ class AccessAide(Tool):
 
         message = ('<h3>Routine completed</h3>'
                    '<p>Language attributes added: {lang_tag}<br>'
-                   'Aria roles added: {aria_match}</p>') \
+                   'Aria roles added: {aria_match}<br>'
+                   'Metadata declarations added: {meta_decl}</p>') \
                    .format(**{'lang_tag': self.lang_tag,
-                              'aria_match': self.aria_match})
+                              'aria_match': self.aria_match,
+                              'meta_decl': self.meta_decl})
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
+
+    def add_metadata(self, container):
+        ''' Add metadata to OPF file.
+
+        This method looks up the config file and add appropriate metadata for
+        the volume.
+        '''
+
+        metadata = container.opf_xpath('//opf:metadata')[0]
+
+        meta = self.config.get('meta_tags', None)
+
+        for value in meta:
+
+            for text in meta[value]:
+
+                # if epub3
+                if '3.' in container.opf_version:
+
+                    # prevent overriding
+                    if self.force_override == False \
+                       and container.opf_xpath('//*[contains(@property, "{}")]'\
+                                               .format(value)):
+
+                        continue
+
+                    element = lxml.etree.Element('meta')
+                    element.set('property', ('schema:' + value))
+                    element.text = text
+
+                    self.meta_decl += 1
+
+                # if epub2
+                elif '2.' in container.opf_version:
+
+                    # prevent overriding
+                    if self.force_override == False \
+                       and container.opf_xpath('//*[contains(@name, "{}")]' \
+                                               .format(value)):
+
+                        continue
+
+                    element = lxml.etree.Element('meta')
+                    element.set('name', ('schema:' + value))
+                    element.set('content', text)
+
+                    self.meta_decl += 1
+
+                else:
+
+                    return
+
+                container.insert_into_xml(metadata, element)
+
+            container.dirty(container.opf_name)
