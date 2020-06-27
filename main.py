@@ -52,6 +52,13 @@ class AccessAide(Tool):
         # load a list of extra tags
         self.extra_tags = self.load_json('assets/extra-tags.json')
 
+        # load config data
+        # TODO: in the future, we could have this set by user via GUI
+        self.config = self.load_json('config.json')
+
+        # add metadata to OPF file
+        self.add_metadata(container)
+
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
@@ -121,7 +128,7 @@ class AccessAide(Tool):
 
         This method finds nodes with epub:type attributes
         and adds aria roles appropriately.
-        Before adding the new aria role, the node tag is checked against 
+        Before adding the new aria role, the node tag is checked against
         a given list of possible tags and a list of allowed extra tags. Please,
         refer to the documentation in the `./assets/` folder for more on this.
         '''
@@ -182,3 +189,28 @@ class AccessAide(Tool):
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
+
+    def add_metadata(self, container):
+        ''' Add metadata to OPF file.
+
+        This method looks up the config file and add appropriate metadata for
+        the volume.
+        '''
+
+        metadata = container.opf_xpath('//opf:metadata')[0]
+
+        if self.config.get('epub_type', None) == 'epub3':
+
+            meta = self.config.get('meta_tags', None)
+
+            for value in meta:
+
+                for text in meta[value]:
+
+                    element = lxml.etree.Element('meta')
+                    element.set('property', ('schema:' + value))
+                    element.text = text
+
+                    container.insert_into_xml(metadata, element)
+
+            container.dirty(container.opf_name)

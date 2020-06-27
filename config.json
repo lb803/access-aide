@@ -1,0 +1,16 @@
+{
+    "force_override": false,
+    
+    "epub_type": "epub3",
+
+    "meta_tags": {
+    
+	"accessibilitySummary": ["This publication conforms to WCAG 2.0 AA."],
+
+	"accessMode": ["textual", "visual"],
+
+	"accessModeSufficient": ["textual"],
+
+	"accessibilityFeature": ["structuralNavigation"]
+    }
+}
