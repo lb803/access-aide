@@ -211,6 +211,13 @@ class AccessAide(Tool):
                 # if epub3
                 if '3.' in container.opf_version:
 
+                    # prevent overriding
+                    if self.force_override == False \
+                       and container.opf_xpath('//*[contains(@property, "{}")]'\
+                                               .format(value)):
+
+                        continue
+
                     element = lxml.etree.Element('meta')
                     element.set('property', ('schema:' + value))
                     element.text = text
@@ -219,6 +226,13 @@ class AccessAide(Tool):
 
                 # if epub2
                 elif '2.' in container.opf_version:
+
+                    # prevent overriding
+                    if self.force_override == False \
+                       and container.opf_xpath('//*[contains(@name, "{}")]' \
+                                               .format(value)):
+
+                        continue
 
                     element = lxml.etree.Element('meta')
                     element.set('name', ('schema:' + value))
