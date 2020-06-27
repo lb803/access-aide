@@ -42,6 +42,7 @@ class AccessAide(Tool):
         # Stat counters
         self.lang_tag = 0
         self.aria_match = 0
+        self.meta_decl = 0
 
         # get the book main language
         lang = self.get_lang(container)
@@ -183,9 +184,11 @@ class AccessAide(Tool):
 
         message = ('<h3>Routine completed</h3>'
                    '<p>Language attributes added: {lang_tag}<br>'
-                   'Aria roles added: {aria_match}</p>') \
+                   'Aria roles added: {aria_match}<br>'
+                   'Metadata declarations added: {meta_decl}</p>') \
                    .format(**{'lang_tag': self.lang_tag,
-                              'aria_match': self.aria_match})
+                              'aria_match': self.aria_match,
+                              'meta_decl': self.meta_decl})
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
@@ -212,12 +215,16 @@ class AccessAide(Tool):
                     element.set('property', ('schema:' + value))
                     element.text = text
 
+                    self.meta_decl += 1
+
                 # if epub2
                 elif '2.' in container.opf_version:
 
                     element = lxml.etree.Element('meta')
                     element.set('name', ('schema:' + value))
                     element.set('content', text)
+
+                    self.meta_decl += 1
 
                 else:
 
