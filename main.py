@@ -154,7 +154,7 @@ class AccessAide(Tool):
             # if the tag on 'node' is allowed
             if tag in map['tag'] or tag in self.extra_tags:
 
-                if self.write_attrib(node, 'aria', map['aria']):
+                if self.write_attrib(node, 'role', map['aria']):
 
                     self.aria_match += 1
 
