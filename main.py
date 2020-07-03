@@ -9,6 +9,7 @@ from calibre import force_unicode
 from calibre.gui2 import error_dialog, info_dialog
 from calibre.ebooks.oeb.polish.container import OEB_DOCS
 
+from calibre_plugins.access_aide.config import prefs
 
 class AccessAide(Tool):
     name = 'access-aide'
@@ -34,10 +35,6 @@ class AccessAide(Tool):
         if not container:
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
-
-        # override existing attributes
-        # TODO we could have this set via plugin preferences
-        self.force_override = False
 
         # Stat counters
         self.lang_tag = 0
@@ -166,7 +163,7 @@ class AccessAide(Tool):
         '''
 
         # skip if force_override is not set and attribute is already set
-        if self.force_override == False \
+        if prefs['force_override'] == False \
            and attribute in node.attrib:
 
             return False
@@ -212,7 +209,7 @@ class AccessAide(Tool):
                 if '3.' in container.opf_version:
 
                     # prevent overriding
-                    if self.force_override == False \
+                    if prefs['force_override'] == False \
                        and container.opf_xpath('//*[contains(@property, "{}")]'\
                                                .format(value)):
 
@@ -228,7 +225,7 @@ class AccessAide(Tool):
                 elif '2.' in container.opf_version:
 
                     # prevent overriding
-                    if self.force_override == False \
+                    if prefs['force_override'] == False \
                        and container.opf_xpath('//*[contains(@name, "{}")]' \
                                                .format(value)):
 
