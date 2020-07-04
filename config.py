@@ -1,4 +1,4 @@
-from PyQt5.Qt import QWidget, QHBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit
 from calibre.utils.config import JSONConfig
 
 prefs = JSONConfig('plugins/access_aide')
@@ -6,8 +6,8 @@ prefs = JSONConfig('plugins/access_aide')
 # Set defaults
 prefs.defaults['force_override'] = False
 prefs.defaults['access'] = {
-    'accessibilitySummary': 'This publication conforms to WCAG 2.0 AA.'
-    #'accessMode': ['textual', 'visual'],
+    'accessibilitySummary': 'This publication conforms to WCAG 2.0 AA.',
+    'accessMode': ['textual', 'visual']
     #'accessModeSufficient': ['textual', 'visual'],
     #'accessibilityFeature': 'structuralNavigation'
     }
@@ -33,7 +33,7 @@ class ConfigWidget(QWidget):
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
         self.l.addWidget(access)
-        access_layout = QHBoxLayout()
+        access_layout = QVBoxLayout()
         access.setLayout(access_layout)
 
         self.label = QLabel('Accessibility Summary:')
@@ -44,8 +44,36 @@ class ConfigWidget(QWidget):
         access_layout.addWidget(self.msg)
         self.label.setBuddy(self.msg)
 
+        self.label2 = QLabel('Access Mode:')
+        access_layout.addWidget(self.label2)
+
+        self.acc_mode_t = QCheckBox('&'+_('Textual'), self)
+        access_layout.addWidget(self.acc_mode_t)
+        if 'textual' in prefs['access']['accessMode']:
+            self.acc_mode_t.setChecked(True)
+        else:
+            self.acc_mode_t.setChecked(False)
+
+        self.acc_mode_v = QCheckBox('&'+_('Visual'), self)
+        access_layout.addWidget(self.acc_mode_v)
+
+        if 'visual' in prefs['access']['accessMode']:
+            self.acc_mode_v.setChecked(True)
+
+        else:
+            self.acc_mode_v.setChecked(False)
+
     def save_settings(self):
+
+        access_mode = []
+        if self.acc_mode_t.isChecked():
+            access_mode.append('textual')
+
+        if self.acc_mode_v.isChecked():
+            access_mode.append('visual')
+
         prefs['force_override'] = self.force_override.isChecked()
         prefs['access'] = {
-            'accessibilitySummary': self.msg.text()
+            'accessibilitySummary': self.msg.text(),
+            'accessMode': access_mode
             }
