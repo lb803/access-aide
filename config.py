@@ -1,4 +1,4 @@
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton
 from calibre.utils.config import JSONConfig
 
 prefs = JSONConfig('plugins/access_aide')
@@ -7,8 +7,8 @@ prefs = JSONConfig('plugins/access_aide')
 prefs.defaults['force_override'] = False
 prefs.defaults['access'] = {
     'accessibilitySummary': 'This publication conforms to WCAG 2.0 AA.',
-    'accessMode': ['textual', 'visual']
-    #'accessModeSufficient': ['textual', 'visual'],
+    'accessMode': ['textual', 'visual'],
+    'accessModeSufficient': 'textual'
     #'accessibilityFeature': 'structuralNavigation'
     }
 
@@ -36,6 +36,7 @@ class ConfigWidget(QWidget):
         access_layout = QVBoxLayout()
         access.setLayout(access_layout)
 
+        # accessibilitySummary
         self.label = QLabel('Accessibility Summary:')
         access_layout.addWidget(self.label)
 
@@ -44,6 +45,7 @@ class ConfigWidget(QWidget):
         access_layout.addWidget(self.msg)
         self.label.setBuddy(self.msg)
 
+        # accessMode
         self.label2 = QLabel('Access Mode:')
         access_layout.addWidget(self.label2)
 
@@ -63,8 +65,27 @@ class ConfigWidget(QWidget):
         else:
             self.acc_mode_v.setChecked(False)
 
+        # accessModeSufficient
+        self.label3 = QLabel('Access Mode Sufficient:')
+        access_layout.addWidget(self.label3)
+
+        self.acc_suff_t = QRadioButton('Textual')
+
+        if 'textual' in prefs['access']['accessModeSufficient']:
+            self.acc_suff_t.setChecked(True)
+
+        access_layout.addWidget(self.acc_suff_t)
+
+        self.acc_suff_v = QRadioButton('Visual')
+
+        if 'visual' in prefs['access']['accessModeSufficient']:
+            self.acc_suff_v.setChecked(True)
+
+        access_layout.addWidget(self.acc_suff_v)
+
     def save_settings(self):
 
+        # accessMode
         access_mode = []
         if self.acc_mode_t.isChecked():
             access_mode.append('textual')
@@ -72,8 +93,17 @@ class ConfigWidget(QWidget):
         if self.acc_mode_v.isChecked():
             access_mode.append('visual')
 
+        # accessModeSufficient
+        access_mode_suff = ''
+        if self.acc_suff_t.isChecked():
+            access_mode_suff = 'textual'
+
+        else:
+            access_mode_suff = 'visual'
+
         prefs['force_override'] = self.force_override.isChecked()
         prefs['access'] = {
             'accessibilitySummary': self.msg.text(),
-            'accessMode': access_mode
+            'accessMode': access_mode,
+            'accessModeSufficient': access_mode_suff
             }
