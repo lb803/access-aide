@@ -40,10 +40,10 @@ class ConfigWidget(QWidget):
         self.label = QLabel('Accessibility Summary:')
         access_layout.addWidget(self.label)
 
-        self.msg = QLineEdit(self)
-        self.msg.setText(prefs['access']['accessibilitySummary'])
-        access_layout.addWidget(self.msg)
-        self.label.setBuddy(self.msg)
+        self.acc_summ = QLineEdit(self)
+        self.acc_summ.setText(prefs['access']['accessibilitySummary'])
+        access_layout.addWidget(self.acc_summ)
+        self.label.setBuddy(self.acc_summ)
 
         # accessMode
         self.label2 = QLabel('Access Mode:')
@@ -113,7 +113,7 @@ class ConfigWidget(QWidget):
 
         prefs['force_override'] = self.force_override.isChecked()
         prefs['access'] = {
-            'accessibilitySummary': self.msg.text(),
+            'accessibilitySummary': self.acc_summ.text(),
             'accessMode': access_mode,
             'accessModeSufficient': access_mode_suff,
             'accessibilityFeature': self.acc_feat.text()
