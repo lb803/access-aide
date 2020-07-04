@@ -8,8 +8,8 @@ prefs.defaults['force_override'] = False
 prefs.defaults['access'] = {
     'accessibilitySummary': 'This publication conforms to WCAG 2.0 AA.',
     'accessMode': ['textual', 'visual'],
-    'accessModeSufficient': 'textual'
-    #'accessibilityFeature': 'structuralNavigation'
+    'accessModeSufficient': 'textual',
+    'accessibilityFeature': 'structuralNavigation'
     }
 
 class ConfigWidget(QWidget):
@@ -83,6 +83,16 @@ class ConfigWidget(QWidget):
 
         access_layout.addWidget(self.acc_suff_v)
 
+        # accessibilityFeature
+        self.label4 = QLabel('Accessibility Feature:')
+        access_layout.addWidget(self.label4)
+
+        self.acc_feat = QLineEdit(self)
+        self.acc_feat.setText(prefs['access']['accessibilityFeature'])
+        access_layout.addWidget(self.acc_feat)
+        self.label.setBuddy(self.acc_feat)
+
+
     def save_settings(self):
 
         # accessMode
@@ -105,5 +115,6 @@ class ConfigWidget(QWidget):
         prefs['access'] = {
             'accessibilitySummary': self.msg.text(),
             'accessMode': access_mode,
-            'accessModeSufficient': access_mode_suff
+            'accessModeSufficient': access_mode_suff,
+            'accessibilityFeature': self.acc_feat.text()
             }
