@@ -17,6 +17,8 @@ Plugin behaviour can be fine tuned via plugin config dialogue.
 ## Use
 Open the book to enhance in the Calibre ebook editor and start Access Aide. This can be performed clicking Plugins -> Access Aide, or via Ctrl+Shift+a.
 
+![Access Aide confirm dialogue](docs/confirm_dialogue.png)
+
 # License
 Source code by Luca Baffa, released under the GPL 3 licence.
 
