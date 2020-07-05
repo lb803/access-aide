@@ -50,10 +50,6 @@ class AccessAide(Tool):
         # load a list of extra tags
         self.extra_tags = self.load_json('assets/extra-tags.json')
 
-        # load config data
-        # TODO: in the future, we could have this set by user via GUI
-        self.config = self.load_json('config.json')
-
         # add metadata to OPF file
         self.add_metadata(container)
 
@@ -199,7 +195,7 @@ class AccessAide(Tool):
 
         metadata = container.opf_xpath('//opf:metadata')[0]
 
-        meta = self.config.get('meta_tags', None)
+        meta = prefs['access']
 
         for value in meta:
 
