@@ -6,10 +6,10 @@ prefs = JSONConfig('plugins/access_aide')
 # Set defaults
 prefs.defaults['force_override'] = False
 prefs.defaults['access'] = {
-    'accessibilitySummary': 'This publication conforms to WCAG 2.0 AA.',
+    'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
-    'accessModeSufficient': 'textual',
-    'accessibilityFeature': 'structuralNavigation'
+    'accessModeSufficient': ['textual'],
+    'accessibilityFeature': ['structuralNavigation']
     }
 
 class ConfigWidget(QWidget):
@@ -41,7 +41,7 @@ class ConfigWidget(QWidget):
         access_layout.addWidget(self.label)
 
         self.acc_summ = QLineEdit(self)
-        self.acc_summ.setText(prefs['access']['accessibilitySummary'])
+        self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
         access_layout.addWidget(self.acc_summ)
         self.label.setBuddy(self.acc_summ)
 
@@ -88,7 +88,7 @@ class ConfigWidget(QWidget):
         access_layout.addWidget(self.label4)
 
         self.acc_feat = QLineEdit(self)
-        self.acc_feat.setText(prefs['access']['accessibilityFeature'])
+        self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
         access_layout.addWidget(self.acc_feat)
         self.label.setBuddy(self.acc_feat)
 
@@ -113,8 +113,8 @@ class ConfigWidget(QWidget):
 
         prefs['force_override'] = self.force_override.isChecked()
         prefs['access'] = {
-            'accessibilitySummary': self.acc_summ.text(),
+            'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
-            'accessModeSufficient': access_mode_suff,
-            'accessibilityFeature': self.acc_feat.text()
+            'accessModeSufficient': [access_mode_suff],
+            'accessibilityFeature': [self.acc_feat.text()]
             }
