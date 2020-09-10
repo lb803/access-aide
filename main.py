@@ -53,11 +53,14 @@ class AccessAide(Tool):
         # add metadata to OPF file
         self.add_metadata(container)
 
+        # list of files to ignore
+        blacklist = ['OEBPS/toc.xhtml']
+
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
             # if HTML file
-            if media_type in OEB_DOCS:
+            if media_type in OEB_DOCS and name not in blacklist:
 
                 # set language to <html> tags
                 self.add_lang(container.parsed(name), lang)
