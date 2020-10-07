@@ -54,7 +54,7 @@ class AccessAide(Tool):
         self.add_metadata(container)
 
         # list of files to ignore
-        blacklist = ['OEBPS/toc.xhtml']
+        blacklist = ['toc.xhtml']
 
         # iterate over book files
         for name, media_type in container.mime_map.items():
