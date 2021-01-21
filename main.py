@@ -19,6 +19,12 @@ class AccessAide(Tool):
     allowed_in_toolbar = True
     allowed_in_menu = True
 
+    def __init__(self):
+        # init stat counters
+        self.lang_tag = Stats()
+        self.aria_match = Stats()
+        self.meta_decl = Stats()
+
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
 
@@ -39,41 +45,24 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
-        # Stat counters
-        self.lang_tag = Stats()
-        self.aria_match = Stats()
-        self.meta_decl = Stats()
-
-        # get the book main language
+        # get book main language
         lang = self.get_lang(container)
 
-        # load a map to navigate epub-types and aria roles
-        self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
-
-        # load a list of extra tags
-        self.extra_tags = self.load_json('assets/extra-tags.json')
-
-        # add metadata to OPF file
         self.add_metadata(container)
 
-        # list of files to ignore
         blacklist = ['toc.xhtml']
 
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
-            # if HTML file
-            if media_type in OEB_DOCS and name not in blacklist:
+            if media_type in OEB_DOCS and \
+               name not in blacklist:
 
-                # set language to <html> tags
                 self.add_lang(container.parsed(name), lang)
-
-                # add aria roles
                 self.add_aria(container.parsed(name))
 
                 container.dirty(name)
 
-        # display info dialogue
         self.display_info()
 
     def load_json(self, path):
@@ -133,6 +122,10 @@ class AccessAide(Tool):
         refer to the documentation in the `./assets/` folder for more on this.
         '''
 
+        # load maps
+        epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
+        extra_tags = self.load_json('assets/extra-tags.json')
+
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
                            namespaces={'epub':'http://www.idpf.org/2007/ops'})
@@ -143,7 +136,7 @@ class AccessAide(Tool):
             value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
             # get map for the 'value' key
-            map = self.epubtype_aria_map.get(value, None)
+            map = epubtype_aria_map.get(value, None)
 
             # skip if the epub type is not mapped
             if map == None:
@@ -151,7 +144,7 @@ class AccessAide(Tool):
                 continue
 
             # if the tag on 'node' is allowed
-            if tag in map['tag'] or tag in self.extra_tags:
+            if tag in map['tag'] or tag in extra_tags:
 
                 if self.write_attrib(node, 'role', map['aria']):
 
