@@ -11,10 +11,19 @@ from calibre.ebooks.oeb.polish.container import OEB_DOCS
 
 from calibre_plugins.access_aide.config import prefs
 
+# My modules
+from lib.stats import Stats
+
 class AccessAide(Tool):
     name = 'access-aide'
     allowed_in_toolbar = True
     allowed_in_menu = True
+
+    def __init__(self):
+        # init stat counters
+        self.lang_tag = Stats()
+        self.aria_match = Stats()
+        self.meta_decl = Stats()
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -36,39 +45,29 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
-        # Stat counters
-        self.lang_tag = 0
-        self.aria_match = 0
-        self.meta_decl = 0
-
-        # get the book main language
+        # get book main language
         lang = self.get_lang(container)
 
-        # load a map to navigate epub-types and aria roles
-        self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
-
-        # load a list of extra tags
-        self.extra_tags = self.load_json('assets/extra-tags.json')
-
-        # add metadata to OPF file
         self.add_metadata(container)
+
+        blacklist = ['toc.xhtml']
 
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
-            # if HTML file
-            if media_type in OEB_DOCS:
+            if media_type in OEB_DOCS and \
+               name not in blacklist:
 
-                # set language to <html> tags
                 self.add_lang(container.parsed(name), lang)
-
-                # add aria roles
                 self.add_aria(container.parsed(name))
 
                 container.dirty(name)
 
-        # display info dialogue
         self.display_info()
+
+        self.lang_tag.reset()
+        self.aria_match.reset()
+        self.meta_decl.reset()
 
     def load_json(self, path):
         '''Load a JSON file.
@@ -109,13 +108,13 @@ class AccessAide(Tool):
         # set lang for 'lang' attribute
         if self.write_attrib(html, 'lang', lang):
 
-            self.lang_tag += 1
+            self.lang_tag.increase()
 
         # set lang for 'xml:lang' attribute
         if self.write_attrib(html,
                 '{http://www.w3.org/XML/1998/namespace}lang', lang):
 
-            self.lang_tag += 1
+            self.lang_tag.increase()
 
     def add_aria(self, root):
         '''Add aria roles.
@@ -127,6 +126,10 @@ class AccessAide(Tool):
         refer to the documentation in the `./assets/` folder for more on this.
         '''
 
+        # load maps
+        epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
+        extra_tags = self.load_json('assets/extra-tags.json')
+
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
                            namespaces={'epub':'http://www.idpf.org/2007/ops'})
@@ -137,7 +140,7 @@ class AccessAide(Tool):
             value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
             # get map for the 'value' key
-            map = self.epubtype_aria_map.get(value, None)
+            map = epubtype_aria_map.get(value, None)
 
             # skip if the epub type is not mapped
             if map == None:
@@ -145,11 +148,11 @@ class AccessAide(Tool):
                 continue
 
             # if the tag on 'node' is allowed
-            if tag in map['tag'] or tag in self.extra_tags:
+            if tag in map['tag'] or tag in extra_tags:
 
                 if self.write_attrib(node, 'role', map['aria']):
 
-                    self.aria_match += 1
+                    self.aria_match.increase()
 
     def write_attrib(self, node, attribute, value):
         '''Write attributes to nodes.
@@ -179,9 +182,9 @@ class AccessAide(Tool):
                    '<p>Language attributes added: {lang_tag}<br>'
                    'Aria roles added: {aria_match}<br>'
                    'Metadata declarations added: {meta_decl}</p>') \
-                   .format(**{'lang_tag': self.lang_tag,
-                              'aria_match': self.aria_match,
-                              'meta_decl': self.meta_decl})
+                   .format(**{'lang_tag': self.lang_tag.get(),
+                              'aria_match': self.aria_match.get(),
+                              'meta_decl': self.meta_decl.get()})
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
@@ -215,7 +218,7 @@ class AccessAide(Tool):
                     element.set('property', ('schema:' + value))
                     element.text = text
 
-                    self.meta_decl += 1
+                    self.meta_decl.increase()
 
                 # if epub2
                 elif '2.' in container.opf_version:
@@ -231,7 +234,7 @@ class AccessAide(Tool):
                     element.set('name', ('schema:' + value))
                     element.set('content', text)
 
-                    self.meta_decl += 1
+                    self.meta_decl.increase()
 
                 else:
 
