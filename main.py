@@ -49,7 +49,6 @@ class AccessAide(Tool):
         lang = self.get_lang(container)
 
         # load maps
-        self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
         self.extra_tags = self.load_json('assets/extra-tags.json')
 
         self.add_metadata(container)
@@ -126,6 +125,9 @@ class AccessAide(Tool):
         refer to the documentation in the `./assets/` folder for more on this.
         '''
 
+        # load map
+        epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
+
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
                            namespaces={'epub':'http://www.idpf.org/2007/ops'})
@@ -136,7 +138,7 @@ class AccessAide(Tool):
             value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
             # get map for the 'value' key
-            map = self.epubtype_aria_map.get(value, None)
+            map = epubtype_aria_map.get(value, None)
 
             # skip if the epub type is not mapped
             if map == None:
