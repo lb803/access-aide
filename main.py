@@ -48,9 +48,6 @@ class AccessAide(Tool):
         # get book main language
         lang = self.get_lang(container)
 
-        # load maps
-        self.extra_tags = self.load_json('assets/extra-tags.json')
-
         self.add_metadata(container)
 
         blacklist = ['toc.xhtml']
@@ -125,8 +122,9 @@ class AccessAide(Tool):
         refer to the documentation in the `./assets/` folder for more on this.
         '''
 
-        # load map
+        # load maps
         epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
+        extra_tags = self.load_json('assets/extra-tags.json')
 
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
@@ -146,7 +144,7 @@ class AccessAide(Tool):
                 continue
 
             # if the tag on 'node' is allowed
-            if tag in map['tag'] or tag in self.extra_tags:
+            if tag in map['tag'] or tag in extra_tags:
 
                 if self.write_attrib(node, 'role', map['aria']):
 
