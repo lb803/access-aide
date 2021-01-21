@@ -19,6 +19,12 @@ class AccessAide(Tool):
     allowed_in_toolbar = True
     allowed_in_menu = True
 
+    def __init__(self):
+        # init stat counters
+        self.lang_tag = Stats()
+        self.aria_match = Stats()
+        self.meta_decl = Stats()
+
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
 
@@ -39,41 +45,28 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
-        # Stat counters
-        self.lang_tag = Stats()
-        self.aria_match = Stats()
-        self.meta_decl = Stats()
-
-        # get the book main language
+        # get book main language
         lang = self.get_lang(container)
 
-        # load a map to navigate epub-types and aria roles
+        # load maps
         self.epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
-
-        # load a list of extra tags
         self.extra_tags = self.load_json('assets/extra-tags.json')
 
-        # add metadata to OPF file
         self.add_metadata(container)
 
-        # list of files to ignore
         blacklist = ['toc.xhtml']
 
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
-            # if HTML file
-            if media_type in OEB_DOCS and name not in blacklist:
+            if media_type in OEB_DOCS and \
+               name not in blacklist:
 
-                # set language to <html> tags
                 self.add_lang(container.parsed(name), lang)
-
-                # add aria roles
                 self.add_aria(container.parsed(name))
 
                 container.dirty(name)
 
-        # display info dialogue
         self.display_info()
 
     def load_json(self, path):
