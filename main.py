@@ -11,6 +11,9 @@ from calibre.ebooks.oeb.polish.container import OEB_DOCS
 
 from calibre_plugins.access_aide.config import prefs
 
+# My modules
+from lib.stats import Stats
+
 class AccessAide(Tool):
     name = 'access-aide'
     allowed_in_toolbar = True
@@ -37,9 +40,9 @@ class AccessAide(Tool):
                                 'Need to have a book open first', show=True)
 
         # Stat counters
-        self.lang_tag = 0
-        self.aria_match = 0
-        self.meta_decl = 0
+        self.lang_tag = Stats()
+        self.aria_match = Stats()
+        self.meta_decl = Stats()
 
         # get the book main language
         lang = self.get_lang(container)
@@ -112,13 +115,13 @@ class AccessAide(Tool):
         # set lang for 'lang' attribute
         if self.write_attrib(html, 'lang', lang):
 
-            self.lang_tag += 1
+            self.lang_tag.increase()
 
         # set lang for 'xml:lang' attribute
         if self.write_attrib(html,
                 '{http://www.w3.org/XML/1998/namespace}lang', lang):
 
-            self.lang_tag += 1
+            self.lang_tag.increase()
 
     def add_aria(self, root):
         '''Add aria roles.
@@ -152,7 +155,7 @@ class AccessAide(Tool):
 
                 if self.write_attrib(node, 'role', map['aria']):
 
-                    self.aria_match += 1
+                    self.aria_match.increase()
 
     def write_attrib(self, node, attribute, value):
         '''Write attributes to nodes.
@@ -182,9 +185,9 @@ class AccessAide(Tool):
                    '<p>Language attributes added: {lang_tag}<br>'
                    'Aria roles added: {aria_match}<br>'
                    'Metadata declarations added: {meta_decl}</p>') \
-                   .format(**{'lang_tag': self.lang_tag,
-                              'aria_match': self.aria_match,
-                              'meta_decl': self.meta_decl})
+                   .format(**{'lang_tag': self.lang_tag.get(),
+                              'aria_match': self.aria_match.get(),
+                              'meta_decl': self.meta_decl.get()})
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
@@ -218,7 +221,7 @@ class AccessAide(Tool):
                     element.set('property', ('schema:' + value))
                     element.text = text
 
-                    self.meta_decl += 1
+                    self.meta_decl.increase()
 
                 # if epub2
                 elif '2.' in container.opf_version:
@@ -234,7 +237,7 @@ class AccessAide(Tool):
                     element.set('name', ('schema:' + value))
                     element.set('content', text)
 
-                    self.meta_decl += 1
+                    self.meta_decl.increase()
 
                 else:
 
