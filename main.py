@@ -65,6 +65,10 @@ class AccessAide(Tool):
 
         self.display_info()
 
+        self.lang_tag.reset()
+        self.aria_match.reset()
+        self.meta_decl.reset()
+
     def load_json(self, path):
         '''Load a JSON file.
 
