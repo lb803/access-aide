@@ -4,7 +4,8 @@ class Stats:
     '''
     Simple class to manage stats.
 
-    Once the object is created, stat value can be increased and returned.
+    Once the object is created, stat value can be increased, returned
+    and reset to zero.
     '''
 
     def __init__(self):
@@ -15,3 +16,6 @@ class Stats:
 
     def get(self):
         return self.value
+
+    def reset(self):
+        self.value = 0
