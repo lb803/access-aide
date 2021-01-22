@@ -151,20 +151,15 @@ class AccessAide(Tool):
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
-        A preliminary check is performed, in the spirit of keeping
-        changes to the original document to a minimum.
+        Attributes are written if config has 'force_override' set 
+        or if node is not present.
         '''
 
-        # skip if force_override is not set and attribute is already set
-        if prefs['force_override'] == False \
-           and attribute in node.attrib:
+        if prefs['force_override'] == True \
+           or attribute not in node.attrib:
 
-            return
-
-        node.attrib[attribute] = value
-
-        # increase stats
-        stat.increase()
+            node.attrib[attribute] = value
+            stat.increase()
 
         return
 
