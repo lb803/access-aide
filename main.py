@@ -21,9 +21,9 @@ class AccessAide(Tool):
 
     def __init__(self):
         # init stat counters
-        self.lang_tag = Stats()
-        self.aria_match = Stats()
-        self.meta_decl = Stats()
+        self.lang_stat = Stats() # language tags
+        self.aria_stat = Stats() # aria roles matches
+        self.meta_stat = Stats() # metadata declarations
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -65,9 +65,9 @@ class AccessAide(Tool):
 
         self.display_info()
 
-        self.lang_tag.reset()
-        self.aria_match.reset()
-        self.meta_decl.reset()
+        self.lang_stat.reset()
+        self.aria_stat.reset()
+        self.meta_stat.reset()
 
     def load_json(self, path):
         '''Load a JSON file.
@@ -106,11 +106,11 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' attribute
-        self.write_attrib(html, 'lang', lang, self.lang_tag)
+        self.write_attrib(html, 'lang', lang, self.lang_stat)
 
         # set lang for 'xml:lang' attribute
         self.write_attrib(html, '{http://www.w3.org/XML/1998/namespace}lang',
-                          lang, self.lang_tag)
+                          lang, self.lang_stat)
 
     def add_aria(self, root):
         '''Add aria roles.
@@ -146,7 +146,7 @@ class AccessAide(Tool):
             # if the tag on 'node' is allowed
             if tag in map['tag'] or tag in extra_tags:
 
-                self.write_attrib(node, 'role', map['aria'], self.aria_match)
+                self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
@@ -176,13 +176,13 @@ class AccessAide(Tool):
         '''
 
         template = ('<h3>Routine completed</h3>'
-                    '<p>Language attributes added: {lang_tag}<br>'
-                    'Aria roles added: {aria_match}<br>'
-                    'Metadata declarations added: {meta_decl}</p>')
+                    '<p>Language attributes added: {lang_stat}<br>'
+                    'Aria roles added: {aria_stat}<br>'
+                    'Metadata declarations added: {meta_stat}</p>')
 
-        data = {'lang_tag': self.lang_tag.get(),
-                'aria_match': self.aria_match.get(),
-                'meta_decl': self.meta_decl.get()}
+        data = {'lang_stat': self.lang_stat.get(),
+                'aria_stat': self.aria_stat.get(),
+                'meta_stat': self.meta_stat.get()}
 
         message = template.format(**data)
 
@@ -218,7 +218,7 @@ class AccessAide(Tool):
                     element.set('property', ('schema:' + value))
                     element.text = text
 
-                    self.meta_decl.increase()
+                    self.meta_stat.increase()
 
                 # if epub2
                 elif '2.' in container.opf_version:
@@ -234,7 +234,7 @@ class AccessAide(Tool):
                     element.set('name', ('schema:' + value))
                     element.set('content', text)
 
-                    self.meta_decl.increase()
+                    self.meta_stat.increase()
 
                 else:
 
