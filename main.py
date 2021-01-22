@@ -178,13 +178,16 @@ class AccessAide(Tool):
         runtime along with some statistics.
         '''
 
-        message = ('<h3>Routine completed</h3>'
-                   '<p>Language attributes added: {lang_tag}<br>'
-                   'Aria roles added: {aria_match}<br>'
-                   'Metadata declarations added: {meta_decl}</p>') \
-                   .format(**{'lang_tag': self.lang_tag.get(),
-                              'aria_match': self.aria_match.get(),
-                              'meta_decl': self.meta_decl.get()})
+        template = ('<h3>Routine completed</h3>'
+                    '<p>Language attributes added: {lang_tag}<br>'
+                    'Aria roles added: {aria_match}<br>'
+                    'Metadata declarations added: {meta_decl}</p>')
+
+        data = {'lang_tag': self.lang_tag.get(),
+                'aria_match': self.aria_match.get(),
+                'meta_decl': self.meta_decl.get()}
+
+        message = template.format(**data)
 
         info_dialog(self.gui, 'Access Aide',
                     message, show=True)
