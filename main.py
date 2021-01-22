@@ -106,15 +106,11 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' attribute
-        if self.write_attrib(html, 'lang', lang):
-
-            self.lang_tag.increase()
+        self.write_attrib(html, 'lang', lang, self.lang_tag)
 
         # set lang for 'xml:lang' attribute
-        if self.write_attrib(html,
-                '{http://www.w3.org/XML/1998/namespace}lang', lang):
-
-            self.lang_tag.increase()
+        self.write_attrib(html, '{http://www.w3.org/XML/1998/namespace}lang',
+                          lang, self.lang_tag)
 
     def add_aria(self, root):
         '''Add aria roles.
@@ -150,11 +146,9 @@ class AccessAide(Tool):
             # if the tag on 'node' is allowed
             if tag in map['tag'] or tag in extra_tags:
 
-                if self.write_attrib(node, 'role', map['aria']):
+                self.write_attrib(node, 'role', map['aria'], self.aria_match)
 
-                    self.aria_match.increase()
-
-    def write_attrib(self, node, attribute, value):
+    def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
         A preliminary check is performed, in the spirit of keeping
@@ -165,11 +159,14 @@ class AccessAide(Tool):
         if prefs['force_override'] == False \
            and attribute in node.attrib:
 
-            return False
+            return
 
         node.attrib[attribute] = value
 
-        return True
+        # increase stats
+        stat.increase()
+
+        return
 
     def display_info(self):
         '''Display an info dialogue.
