@@ -135,16 +135,10 @@ class AccessAide(Tool):
             tag = lxml.etree.QName(node).localname
             value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
-            # get map for the 'value' key
-            map = epubtype_aria_map.get(value, None)
+            # get map for the 'value' key (if present)
+            map = epubtype_aria_map.get(value, False)
 
-            # skip if the epub type is not mapped
-            if map == None:
-
-                continue
-
-            # if the tag on 'node' is allowed
-            if tag in map['tag'] or tag in extra_tags:
+            if map and (tag in map['tag'] or tag in extra_tags):
 
                 self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
