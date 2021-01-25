@@ -145,7 +145,7 @@ class AccessAide(Tool):
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
-        Attributes are written if config has 'force_override' set 
+        Attributes are written if config has 'force_override' set
         or if node is not present.
         '''
 
@@ -197,38 +197,33 @@ class AccessAide(Tool):
                 if '3.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == False \
-                       and container.opf_xpath('//*[contains(@property, "{}")]'\
+                    if prefs['force_override'] == True \
+                       or not container.opf_xpath('//*[contains(@property, "{}")]'\
                                                .format(value)):
 
-                        continue
+                        element = lxml.etree.Element('meta')
+                        element.set('property', ('schema:' + value))
+                        element.text = text
 
-                    element = lxml.etree.Element('meta')
-                    element.set('property', ('schema:' + value))
-                    element.text = text
+                        container.insert_into_xml(metadata, element)
 
-                    self.meta_stat.increase()
+                        self.meta_stat.increase()
 
                 # if epub2
                 elif '2.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == False \
-                       and container.opf_xpath('//*[contains(@name, "{}")]' \
+                    if prefs['force_override'] == True \
+                       or not container.opf_xpath('//*[contains(@name, "{}")]' \
                                                .format(value)):
 
-                        continue
+                        element = lxml.etree.Element('meta')
+                        element.set('name', ('schema:' + value))
+                        element.set('content', text)
 
-                    element = lxml.etree.Element('meta')
-                    element.set('name', ('schema:' + value))
-                    element.set('content', text)
+                        container.insert_into_xml(metadata, element)
 
-                    self.meta_stat.increase()
+                        self.meta_stat.increase()
 
-                else:
-
-                    return
-
-                container.insert_into_xml(metadata, element)
 
             container.dirty(container.opf_name)
