@@ -75,15 +75,6 @@ class AccessAide(Tool):
         self.aria_stat.reset()
         self.meta_stat.reset()
 
-    def load_json(self, path):
-        '''Load a JSON file.
-
-        This method loads a json file stored inside the plugin
-        given its relative path. The method returns a python object.
-        '''
-
-        return json.loads(get_resources(path))
-
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
 
@@ -112,8 +103,9 @@ class AccessAide(Tool):
         '''
 
         # load maps
-        epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
-        extra_tags = self.load_json('assets/extra-tags.json')
+        epubtype_aria_map = json.loads(
+                              get_resources('assets/epubtype-aria-map.json'))
+        extra_tags = json.loads(get_resources('assets/extra-tags.json'))
 
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
