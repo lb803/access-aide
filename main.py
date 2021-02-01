@@ -45,9 +45,9 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
+        # get book main language
         try:
-            lang = self.get_lang(container)
-
+            lang = container.opf_xpath('//dc:language/text()')[0]
         except IndexError:
             error_dialog(self.gui, 'Access Aide',
                          'The OPF file does not report language info.',
@@ -83,18 +83,6 @@ class AccessAide(Tool):
         '''
 
         return json.loads(get_resources(path))
-
-    def get_lang(self, container):
-        '''Retrieve book main language.
-
-        This method parses the OPF file, gets a list of the declared
-        languages and returns the first one (which we trust to be the
-        main language of the book).
-        '''
-
-        languages = container.opf_xpath('//dc:language/text()')
-
-        return languages[0]
 
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
