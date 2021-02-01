@@ -63,7 +63,7 @@ class AccessAide(Tool):
 
                 container.dirty(name)
 
-        self.display_info()
+        info_dialog(self.gui, 'Access Aide', self.stats_report(), show=True)
 
         self.lang_stat.reset()
         self.aria_stat.reset()
@@ -157,10 +157,10 @@ class AccessAide(Tool):
 
         return
 
-    def display_info(self):
-        '''Display an info dialogue.
+    def stats_report(self):
+        '''Compose a short report on stats.
 
-        This method composes and shows an info dialogue to display at the end of
+        This method returns a string to display at the end of
         runtime along with some statistics.
         '''
 
@@ -173,10 +173,8 @@ class AccessAide(Tool):
                 'aria_stat': self.aria_stat.get(),
                 'meta_stat': self.meta_stat.get()}
 
-        message = template.format(**data)
+        return template.format(**data)
 
-        info_dialog(self.gui, 'Access Aide',
-                    message, show=True)
 
     def add_metadata(self, container):
         ''' Add metadata to OPF file.
