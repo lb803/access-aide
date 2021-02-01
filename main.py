@@ -45,8 +45,14 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
-        # get book main language
-        lang = self.get_lang(container)
+        try:
+            lang = self.get_lang(container)
+
+        except IndexError:
+            error_dialog(self.gui, 'Access Aide',
+                         'The OPF file does not report language info.',
+                         show=True)
+            raise
 
         self.add_metadata(container)
 
@@ -87,11 +93,6 @@ class AccessAide(Tool):
         '''
 
         languages = container.opf_xpath('//dc:language/text()')
-
-        if not languages:
-            return error_dialog(self.gui, 'Access Aide',
-                                'The OPF file does not report language info.',
-                                show=True)
 
         return languages[0]
 
