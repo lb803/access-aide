@@ -1,8 +1,6 @@
 # Access Aide
 _Access Aide_ is a Calibre (book editor) plugin to enhance epubs with accessibility features.
 
-The _Access Aide_ plugin for Calibre is undergoing testing.
-
 # Features
  -  Add language declaration to `<html>` tags;
  -  Map epub:type attributes to their appropriate aria role attribute.
