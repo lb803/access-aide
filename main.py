@@ -14,16 +14,18 @@ from calibre_plugins.access_aide.config import prefs
 # My modules
 from lib.stats import Stats
 
+
 class AccessAide(Tool):
     name = 'access-aide'
     allowed_in_toolbar = True
     allowed_in_menu = True
 
     def __init__(self):
+
         # init stat counters
-        self.lang_tag = Stats()
-        self.aria_match = Stats()
-        self.meta_decl = Stats()
+        self.lang_stat = Stats()  # language tags
+        self.aria_stat = Stats()  # aria roles matches
+        self.meta_stat = Stats()  # metadata declarations
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -46,7 +48,13 @@ class AccessAide(Tool):
                                 'Need to have a book open first', show=True)
 
         # get book main language
-        lang = self.get_lang(container)
+        try:
+            lang = container.opf_xpath('//dc:language/text()')[0]
+        except IndexError:
+            error_dialog(self.gui, 'Access Aide',
+                         'The OPF file does not report language info.',
+                         show=True)
+            raise
 
         self.add_metadata(container)
 
@@ -55,45 +63,19 @@ class AccessAide(Tool):
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
-            if media_type in OEB_DOCS and \
-               name not in blacklist:
+            if media_type in OEB_DOCS \
+               and name not in blacklist:
 
                 self.add_lang(container.parsed(name), lang)
                 self.add_aria(container.parsed(name))
 
                 container.dirty(name)
 
-        self.display_info()
+        info_dialog(self.gui, 'Access Aide', self.stats_report(), show=True)
 
-        self.lang_tag.reset()
-        self.aria_match.reset()
-        self.meta_decl.reset()
-
-    def load_json(self, path):
-        '''Load a JSON file.
-
-        This method loads a json file stored inside the plugin
-        given its relative path. The method returns a python object.
-        '''
-
-        return json.loads(get_resources(path))
-
-    def get_lang(self, container):
-        '''Retrieve book main language.
-
-        This method parses the OPF file, gets a list of the declared
-        languages and returns the first one (which we trust to be the
-        main language of the book).
-        '''
-
-        languages = container.opf_xpath('//dc:language/text()')
-
-        if not languages:
-            return error_dialog(self.gui, 'Access Aide',
-                                'The OPF file does not report language info.',
-                                show=True)
-
-        return languages[0]
+        self.lang_stat.reset()
+        self.aria_stat.reset()
+        self.meta_stat.reset()
 
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
@@ -106,15 +88,11 @@ class AccessAide(Tool):
         html = root.xpath('//*[local-name()="html"]')[0]
 
         # set lang for 'lang' attribute
-        if self.write_attrib(html, 'lang', lang):
-
-            self.lang_tag.increase()
+        self.write_attrib(html, 'lang', lang, self.lang_stat)
 
         # set lang for 'xml:lang' attribute
-        if self.write_attrib(html,
-                '{http://www.w3.org/XML/1998/namespace}lang', lang):
-
-            self.lang_tag.increase()
+        self.write_attrib(html, '{http://www.w3.org/XML/1998/namespace}lang',
+                          lang, self.lang_stat)
 
     def add_aria(self, root):
         '''Add aria roles.
@@ -127,67 +105,58 @@ class AccessAide(Tool):
         '''
 
         # load maps
-        epubtype_aria_map = self.load_json('assets/epubtype-aria-map.json')
-        extra_tags = self.load_json('assets/extra-tags.json')
+        epubtype_aria_map = json.loads(
+                              get_resources('assets/epubtype-aria-map.json'))
+        extra_tags = json.loads(get_resources('assets/extra-tags.json'))
 
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
-                           namespaces={'epub':'http://www.idpf.org/2007/ops'})
+                           namespaces={'epub': 'http://www.idpf.org/2007/ops'})
 
         for node in nodes:
 
             tag = lxml.etree.QName(node).localname
             value = node.attrib['{http://www.idpf.org/2007/ops}type']
 
-            # get map for the 'value' key
-            map = epubtype_aria_map.get(value, None)
+            # get map for the 'value' key (if present)
+            map = epubtype_aria_map.get(value, False)
 
-            # skip if the epub type is not mapped
-            if map == None:
+            if map and (tag in map['tag'] or tag in extra_tags):
 
-                continue
+                self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
-            # if the tag on 'node' is allowed
-            if tag in map['tag'] or tag in extra_tags:
-
-                if self.write_attrib(node, 'role', map['aria']):
-
-                    self.aria_match.increase()
-
-    def write_attrib(self, node, attribute, value):
+    def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
-        A preliminary check is performed, in the spirit of keeping
-        changes to the original document to a minimum.
+        Attributes are written if config has 'force_override' set
+        or if node is not present.
         '''
 
-        # skip if force_override is not set and attribute is already set
-        if prefs['force_override'] == False \
-           and attribute in node.attrib:
+        if prefs['force_override'] \
+           or attribute not in node.attrib:
 
-            return False
+            node.attrib[attribute] = value
+            stat.increase()
 
-        node.attrib[attribute] = value
+        return
 
-        return True
+    def stats_report(self):
+        '''Compose a short report on stats.
 
-    def display_info(self):
-        '''Display an info dialogue.
-
-        This method composes and shows an info dialogue to display at the end of
+        This method returns a string to display at the end of
         runtime along with some statistics.
         '''
 
-        message = ('<h3>Routine completed</h3>'
-                   '<p>Language attributes added: {lang_tag}<br>'
-                   'Aria roles added: {aria_match}<br>'
-                   'Metadata declarations added: {meta_decl}</p>') \
-                   .format(**{'lang_tag': self.lang_tag.get(),
-                              'aria_match': self.aria_match.get(),
-                              'meta_decl': self.meta_decl.get()})
+        template = ('<h3>Routine completed</h3>'
+                    '<p>Language attributes added: {lang_stat}<br>'
+                    'Aria roles added: {aria_stat}<br>'
+                    'Metadata declarations added: {meta_stat}</p>')
 
-        info_dialog(self.gui, 'Access Aide',
-                    message, show=True)
+        data = {'lang_stat': self.lang_stat.get(),
+                'aria_stat': self.aria_stat.get(),
+                'meta_stat': self.meta_stat.get()}
+
+        return template.format(**data)
 
     def add_metadata(self, container):
         ''' Add metadata to OPF file.
@@ -208,38 +177,32 @@ class AccessAide(Tool):
                 if '3.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == False \
-                       and container.opf_xpath('//*[contains(@property, "{}")]'\
-                                               .format(value)):
+                    if prefs['force_override'] \
+                       or not container.opf_xpath(
+                           '//*[contains(@property, "{}")]'.format(value)):
 
-                        continue
+                        element = lxml.etree.Element('meta')
+                        element.set('property', ('schema:' + value))
+                        element.text = text
 
-                    element = lxml.etree.Element('meta')
-                    element.set('property', ('schema:' + value))
-                    element.text = text
+                        container.insert_into_xml(metadata, element)
 
-                    self.meta_decl.increase()
+                        self.meta_stat.increase()
 
                 # if epub2
                 elif '2.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == False \
-                       and container.opf_xpath('//*[contains(@name, "{}")]' \
-                                               .format(value)):
+                    if prefs['force_override'] \
+                       or not container.opf_xpath(
+                           '//*[contains(@name, "{}")]'.format(value)):
 
-                        continue
+                        element = lxml.etree.Element('meta')
+                        element.set('name', ('schema:' + value))
+                        element.set('content', text)
 
-                    element = lxml.etree.Element('meta')
-                    element.set('name', ('schema:' + value))
-                    element.set('content', text)
+                        container.insert_into_xml(metadata, element)
 
-                    self.meta_decl.increase()
-
-                else:
-
-                    return
-
-                container.insert_into_xml(metadata, element)
+                        self.meta_stat.increase()
 
             container.dirty(container.opf_name)
