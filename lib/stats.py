@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 class Stats:
     '''
     Simple class to manage stats.

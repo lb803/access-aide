@@ -14,16 +14,18 @@ from calibre_plugins.access_aide.config import prefs
 # My modules
 from lib.stats import Stats
 
+
 class AccessAide(Tool):
     name = 'access-aide'
     allowed_in_toolbar = True
     allowed_in_menu = True
 
     def __init__(self):
+
         # init stat counters
-        self.lang_stat = Stats() # language tags
-        self.aria_stat = Stats() # aria roles matches
-        self.meta_stat = Stats() # metadata declarations
+        self.lang_stat = Stats()  # language tags
+        self.aria_stat = Stats()  # aria roles matches
+        self.meta_stat = Stats()  # metadata declarations
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -61,8 +63,8 @@ class AccessAide(Tool):
         # iterate over book files
         for name, media_type in container.mime_map.items():
 
-            if media_type in OEB_DOCS and \
-               name not in blacklist:
+            if media_type in OEB_DOCS \
+               and name not in blacklist:
 
                 self.add_lang(container.parsed(name), lang)
                 self.add_aria(container.parsed(name))
@@ -109,7 +111,7 @@ class AccessAide(Tool):
 
         # find nodes with  an 'epub:type' attribute
         nodes = root.xpath('//*[@epub:type]',
-                           namespaces={'epub':'http://www.idpf.org/2007/ops'})
+                           namespaces={'epub': 'http://www.idpf.org/2007/ops'})
 
         for node in nodes:
 
@@ -130,7 +132,7 @@ class AccessAide(Tool):
         or if node is not present.
         '''
 
-        if prefs['force_override'] == True \
+        if prefs['force_override'] \
            or attribute not in node.attrib:
 
             node.attrib[attribute] = value
@@ -156,7 +158,6 @@ class AccessAide(Tool):
 
         return template.format(**data)
 
-
     def add_metadata(self, container):
         ''' Add metadata to OPF file.
 
@@ -176,9 +177,9 @@ class AccessAide(Tool):
                 if '3.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == True \
-                       or not container.opf_xpath('//*[contains(@property, "{}")]'\
-                                               .format(value)):
+                    if prefs['force_override'] \
+                       or not container.opf_xpath(
+                           '//*[contains(@property, "{}")]'.format(value)):
 
                         element = lxml.etree.Element('meta')
                         element.set('property', ('schema:' + value))
@@ -192,9 +193,9 @@ class AccessAide(Tool):
                 elif '2.' in container.opf_version:
 
                     # prevent overriding
-                    if prefs['force_override'] == True \
-                       or not container.opf_xpath('//*[contains(@name, "{}")]' \
-                                               .format(value)):
+                    if prefs['force_override'] \
+                       or not container.opf_xpath(
+                           '//*[contains(@name, "{}")]'.format(value)):
 
                         element = lxml.etree.Element('meta')
                         element.set('name', ('schema:' + value))
@@ -203,6 +204,5 @@ class AccessAide(Tool):
                         container.insert_into_xml(metadata, element)
 
                         self.meta_stat.increase()
-
 
             container.dirty(container.opf_name)
