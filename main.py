@@ -12,7 +12,7 @@ from calibre.ebooks.oeb.polish.container import OEB_DOCS
 from calibre_plugins.access_aide.config import prefs
 
 # My modules
-from lib.stats import Stats
+from .lib.stats import Stats
 
 
 class AccessAide(Tool):
@@ -61,7 +61,7 @@ class AccessAide(Tool):
         blacklist = ['toc.xhtml']
 
         # iterate over book files
-        for name, media_type in container.mime_map.items():
+        for name, media_type in list(container.mime_map.items()):
 
             if media_type in OEB_DOCS \
                and name not in blacklist:
