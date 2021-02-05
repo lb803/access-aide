@@ -77,6 +77,9 @@ class AccessAide(Tool):
         self.aria_stat.reset()
         self.meta_stat.reset()
 
+        # update the editor UI
+        self.boss.apply_container_update_to_gui()
+
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
 
