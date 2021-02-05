@@ -77,6 +77,9 @@ class AccessAide(Tool):
         self.aria_stat.reset()
         self.meta_stat.reset()
 
+        # update the editor UI
+        self.boss.apply_container_update_to_gui()
+
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
 
@@ -116,14 +119,17 @@ class AccessAide(Tool):
         for node in nodes:
 
             tag = lxml.etree.QName(node).localname
-            value = node.attrib['{http://www.idpf.org/2007/ops}type']
+            values = node.attrib['{http://www.idpf.org/2007/ops}type']
 
-            # get map for the 'value' key (if present)
-            map = epubtype_aria_map.get(value, False)
+            # iter over values, in case of epub:type overloading
+            for value in values.split(' '):
 
-            if map and (tag in map['tag'] or tag in extra_tags):
+                # get map for the 'value' key (if present)
+                map = epubtype_aria_map.get(value, False)
 
-                self.write_attrib(node, 'role', map['aria'], self.aria_stat)
+                if map and (tag in map['tag'] or tag in extra_tags):
+
+                    self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
