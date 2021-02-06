@@ -44,8 +44,9 @@ class AccessAide(Tool):
         container = self.current_container
 
         if not container:
-            return error_dialog(self.gui, 'No book open',
-                                'Need to have a book open first', show=True)
+            message = 'No book open, you need to have a book open first.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         if container.book_type != 'epub':
             message = 'Access Aide supports EPUB files only, {} given.' \
@@ -57,10 +58,9 @@ class AccessAide(Tool):
         try:
             lang = container.opf_xpath('//dc:language/text()')[0]
         except IndexError:
-            error_dialog(self.gui, 'Access Aide',
-                         'The OPF file does not report language info.',
-                         show=True)
-            raise
+            message = 'The OPF file does not report language info.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         self.add_metadata(container)
 
