@@ -48,8 +48,10 @@ class AccessAide(Tool):
                                 'Need to have a book open first', show=True)
 
         if container.book_type != 'epub':
-            raise Exception('Access Aide supports EPUB files only, {} given.' \
-                            .format(container.book_type))
+            message = 'Access Aide supports EPUB files only, {} given.' \
+                      .format(container.book_type)
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         # get book main language
         try:
