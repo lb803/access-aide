@@ -184,7 +184,7 @@ class AccessAide(Tool):
             for text in meta[value]:
 
                 # if epub3
-                if '3.' in container.opf_version:
+                if container.opf_version_parsed.major == 3:
 
                     # prevent overriding
                     if prefs['force_override'] \
@@ -203,7 +203,7 @@ class AccessAide(Tool):
                         self.meta_stat.increase()
 
                 # if epub2
-                elif '2.' in container.opf_version:
+                elif container.opf_version_parsed.major == 2:
 
                     # prevent overriding
                     if prefs['force_override'] \
