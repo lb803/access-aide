@@ -223,8 +223,8 @@ class AccessAide(Tool):
 
                         self.meta_stat.increase()
 
-                    else:
-                        # metadata currently available only for EPUB v2 and v3
-                        return
+                else:
+                    # metadata currently available only for EPUB v2 and v3
+                    return
 
             container.dirty(container.opf_name)
