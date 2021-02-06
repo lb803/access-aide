@@ -185,7 +185,10 @@ class AccessAide(Tool):
                     # prevent overriding
                     if prefs['force_override'] \
                        or not container.opf_xpath(
-                           '//*[contains(@property, "{}")]'.format(value)):
+                           '''
+                           //*[contains(@property, "{}")
+                               and contains(text(), "{}")]
+                           '''.format(value, text)):
 
                         element = lxml.etree.Element('meta')
                         element.set('property', ('schema:' + value))
