@@ -47,6 +47,10 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'No book open',
                                 'Need to have a book open first', show=True)
 
+        if container.book_type != 'epub':
+            raise Exception('Access Aide supports EPUB files only, {} given.' \
+                            .format(container.book_type))
+
         # get book main language
         try:
             lang = container.opf_xpath('//dc:language/text()')[0]
@@ -185,7 +189,10 @@ class AccessAide(Tool):
                     # prevent overriding
                     if prefs['force_override'] \
                        or not container.opf_xpath(
-                           '//*[contains(@property, "{}")]'.format(value)):
+                           '''
+                           //*[contains(@property, "{}")
+                               and contains(text(), "{}")]
+                           '''.format(value, text)):
 
                         element = lxml.etree.Element('meta')
                         element.set('property', ('schema:' + value))
@@ -201,7 +208,10 @@ class AccessAide(Tool):
                     # prevent overriding
                     if prefs['force_override'] \
                        or not container.opf_xpath(
-                           '//*[contains(@name, "{}")]'.format(value)):
+                           '''
+                           //*[contains(@name, "{}")
+                               and contains(@content, "{}")]
+                           '''.format(value, text)):
 
                         element = lxml.etree.Element('meta')
                         element.set('name', ('schema:' + value))
