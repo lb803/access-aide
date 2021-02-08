@@ -21,7 +21,7 @@ from calibre.customize import EditBookToolPlugin
 
 class AccessAidePlugin(EditBookToolPlugin):
     name = 'Access Aide'
-    version = (0, 1, 6)
+    version = (0, 1, 7)
     author = 'Luca Baffa'
     supported_platforms = ['windows', 'osx', 'linux']
     description = 'Access Aide plugin for Calibre'
