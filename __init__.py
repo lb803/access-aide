@@ -24,7 +24,7 @@ class AccessAidePlugin(EditBookToolPlugin):
     version = (0, 1, 7)
     author = 'Luca Baffa'
     supported_platforms = ['windows', 'osx', 'linux']
-    description = 'Access Aide plugin for Calibre'
+    description = 'Enhance accessibility features in EPUB files.'
     minimum_calibre_version = (1, 46, 0)
 
     actual_plugin = 'calibre_plugins.access_aide.ui:AccessAidePlugin'
