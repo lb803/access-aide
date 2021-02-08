@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+'''
+Access Aide - A Calibre plugin to enhance accessibility features in epub files.
+Copyright (C) 2020-2021 Luca Baffa
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import lxml.etree
 import json
 from PyQt5.Qt import QAction
@@ -44,21 +63,23 @@ class AccessAide(Tool):
         container = self.current_container
 
         if not container:
-            return error_dialog(self.gui, 'No book open',
-                                'Need to have a book open first', show=True)
+            message = 'No book open, you need to have a book open first.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         if container.book_type != 'epub':
-            raise Exception('Access Aide supports EPUB files only, {} given.' \
-                            .format(container.book_type))
+            message = 'Access Aide supports EPUB files only, {} given.' \
+                      .format(container.book_type)
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         # get book main language
         try:
             lang = container.opf_xpath('//dc:language/text()')[0]
         except IndexError:
-            error_dialog(self.gui, 'Access Aide',
-                         'The OPF file does not report language info.',
-                         show=True)
-            raise
+            message = 'The OPF file does not report language info.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         self.add_metadata(container)
 
@@ -184,7 +205,7 @@ class AccessAide(Tool):
             for text in meta[value]:
 
                 # if epub3
-                if '3.' in container.opf_version:
+                if container.opf_version_parsed.major == 3:
 
                     # prevent overriding
                     if prefs['force_override'] \
@@ -203,7 +224,7 @@ class AccessAide(Tool):
                         self.meta_stat.increase()
 
                 # if epub2
-                elif '2.' in container.opf_version:
+                elif container.opf_version_parsed.major == 2:
 
                     # prevent overriding
                     if prefs['force_override'] \
@@ -220,5 +241,9 @@ class AccessAide(Tool):
                         container.insert_into_xml(metadata, element)
 
                         self.meta_stat.increase()
+
+                else:
+                    # metadata currently available only for EPUB v2 and v3
+                    return
 
             container.dirty(container.opf_name)
