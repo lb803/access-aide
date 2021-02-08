@@ -20,7 +20,7 @@ Open the book to enhance in the Calibre ebook editor and start Access Aide. This
 ![Access Aide confirm dialogue](docs/confirm_dialogue.png)
 
 # License
-Source code by Luca Baffa, released under the GPL 3 licence.
+Copyright (C) 2020-2021 Luca Baffa
 
 This project aims to port the functionalities of the excellent [Access-Aide](https://github.com/kevinhendricks/Access-Aide) LGPL v2.1 Sigil plugin to Calibre.
 
