@@ -73,6 +73,12 @@ class AccessAide(Tool):
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
+        if container.opf_version_parsed.major not in [2, 3]:
+            message = 'Access Aide supports EPUB 2 and 3 only, EPUB {} given.' \
+                      .format(container.opf_version_parsed.major)
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
+
 
         blacklist = ['toc.xhtml']
 
@@ -265,7 +271,3 @@ class AccessAide(Tool):
                         container.insert_into_xml(metadata, element)
 
                         self.meta_stat.increase()
-
-                else:
-                    # metadata currently available only for EPUB v2 and v3
-                    return
