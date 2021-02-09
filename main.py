@@ -73,14 +73,6 @@ class AccessAide(Tool):
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
-        # get book main language
-        try:
-            lang = container.opf_xpath('//dc:language/text()')[0]
-        except IndexError:
-            message = 'The OPF file does not report language info.'
-
-            return error_dialog(self.gui, 'Access Aide', message, show=True)
-
         self.add_metadata(container)
 
         blacklist = ['toc.xhtml']
@@ -91,7 +83,8 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
-                self.add_lang(container.parsed(name), lang)
+                self.add_lang(container.parsed(name),
+                              self.get_lang(container))
                 self.add_aria(container.parsed(name))
 
                 container.dirty(name)
@@ -104,6 +97,22 @@ class AccessAide(Tool):
 
         # update the editor UI
         self.boss.apply_container_update_to_gui()
+
+    def get_lang(self, container):
+        '''Retrieve book main language.
+        This method parses the OPF file, gets a list of the declared
+        languages and returns the first one (which we trust to be the
+        main language of the book).
+        '''
+
+        try:
+            lang = container.opf_xpath('//dc:language/text()')[0]
+        except IndexError:
+            message = 'The OPF file does not report language info.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
+
+        return lang
 
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
