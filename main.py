@@ -26,7 +26,7 @@ from calibre.gui2.tweak_book.plugin import Tool
 
 from calibre import force_unicode
 from calibre.gui2 import error_dialog, info_dialog
-from calibre.ebooks.oeb.polish.container import OEB_DOCS
+from calibre.ebooks.oeb.base import OPF_MIME, OEB_DOCS
 
 from calibre_plugins.access_aide.config import prefs
 
@@ -73,7 +73,6 @@ class AccessAide(Tool):
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
-        self.add_metadata(container)
 
         blacklist = ['toc.xhtml']
 
@@ -87,7 +86,13 @@ class AccessAide(Tool):
                               self.get_lang(container))
                 self.add_aria(container.parsed(name))
 
-                container.dirty(name)
+            elif media_type in OPF_MIME:
+                self.add_metadata(container)
+
+            else:
+                continue
+
+            container.dirty(name)
 
         info_dialog(self.gui, 'Access Aide', self.stats_report(), show=True)
 
@@ -264,5 +269,3 @@ class AccessAide(Tool):
                 else:
                     # metadata currently available only for EPUB v2 and v3
                     return
-
-            container.dirty(container.opf_name)
