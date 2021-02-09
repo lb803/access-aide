@@ -154,6 +154,11 @@ class AccessAide(Tool):
 
                 if map and (tag in map['tag'] or tag in extra_tags):
 
+                    # EXCEPTIONS
+                    # skip if <img> doesn't have alt text
+                    if tag == 'img' and not node.get('alt'):
+                        continue
+
                     self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
     def write_attrib(self, node, attribute, value, stat):
