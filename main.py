@@ -63,22 +63,17 @@ class AccessAide(Tool):
         container = self.current_container
 
         if not container:
-            message = 'No book open, you need to have a book open first.'
+            return error_dialog(self.gui, 'Access Aide',
+                                'No book open, please open a book first.',
+                                show=True)
+
+        if container.book_type != 'epub' or \
+           container.opf_version_parsed.major not in range(2, 3):
+            message = 'Access Aide supports EPUB 2 and 3, {} {} given.' \
+                      .format(container.book_type.upper(),
+                              container.opf_version_parsed.major)
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
-
-        if container.book_type != 'epub':
-            message = 'Access Aide supports EPUB files only, {} given.' \
-                      .format(container.book_type)
-
-            return error_dialog(self.gui, 'Access Aide', message, show=True)
-
-        if container.opf_version_parsed.major not in [2, 3]:
-            message = 'Access Aide supports EPUB 2 and 3 only, EPUB {} given.' \
-                      .format(container.opf_version_parsed.major)
-
-            return error_dialog(self.gui, 'Access Aide', message, show=True)
-
 
         blacklist = ['toc.xhtml']
 
