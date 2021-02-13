@@ -68,7 +68,7 @@ class AccessAide(Tool):
                                 show=True)
 
         if container.book_type != 'epub' or \
-           container.opf_version_parsed.major not in range(2, 3):
+           container.opf_version_parsed.major not in [2, 3]:
             message = 'Access Aide supports EPUB 2 and 3, {} {} given.' \
                       .format(container.book_type.upper(),
                               container.opf_version_parsed.major)
