@@ -1,4 +1,5 @@
 [
+    "a",
     "abbr",
     "address",
     "b",
@@ -14,6 +15,7 @@
     "div",
     "em",
     "i",
+    "img",
     "ins",
     "kbd",
     "mark",

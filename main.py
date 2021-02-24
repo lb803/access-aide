@@ -26,7 +26,7 @@ from calibre.gui2.tweak_book.plugin import Tool
 
 from calibre import force_unicode
 from calibre.gui2 import error_dialog, info_dialog
-from calibre.ebooks.oeb.polish.container import OEB_DOCS
+from calibre.ebooks.oeb.base import OPF_MIME, OEB_DOCS
 
 from calibre_plugins.access_aide.config import prefs
 
@@ -63,25 +63,17 @@ class AccessAide(Tool):
         container = self.current_container
 
         if not container:
-            message = 'No book open, you need to have a book open first.'
+            return error_dialog(self.gui, 'Access Aide',
+                                'No book open, please open a book first.',
+                                show=True)
+
+        if container.book_type != 'epub' or \
+           container.opf_version_parsed.major not in [2, 3]:
+            message = 'Access Aide supports EPUB 2 and 3, {} {} given.' \
+                      .format(container.book_type.upper(),
+                              container.opf_version_parsed.major)
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
-
-        if container.book_type != 'epub':
-            message = 'Access Aide supports EPUB files only, {} given.' \
-                      .format(container.book_type)
-
-            return error_dialog(self.gui, 'Access Aide', message, show=True)
-
-        # get book main language
-        try:
-            lang = container.opf_xpath('//dc:language/text()')[0]
-        except IndexError:
-            message = 'The OPF file does not report language info.'
-
-            return error_dialog(self.gui, 'Access Aide', message, show=True)
-
-        self.add_metadata(container)
 
         blacklist = ['toc.xhtml']
 
@@ -91,10 +83,17 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
-                self.add_lang(container.parsed(name), lang)
+                self.add_lang(container.parsed(name),
+                              self.get_lang(container))
                 self.add_aria(container.parsed(name))
 
-                container.dirty(name)
+            elif media_type in OPF_MIME:
+                self.add_metadata(container)
+
+            else:
+                continue
+
+            container.dirty(name)
 
         info_dialog(self.gui, 'Access Aide', self.stats_report(), show=True)
 
@@ -104,6 +103,22 @@ class AccessAide(Tool):
 
         # update the editor UI
         self.boss.apply_container_update_to_gui()
+
+    def get_lang(self, container):
+        '''Retrieve book main language.
+        This method parses the OPF file, gets a list of the declared
+        languages and returns the first one (which we trust to be the
+        main language of the book).
+        '''
+
+        try:
+            lang = container.opf_xpath('//dc:language/text()')[0]
+        except IndexError:
+            message = 'The OPF file does not report language info.'
+
+            return error_dialog(self.gui, 'Access Aide', message, show=True)
+
+        return lang
 
     def add_lang(self, root, lang):
         '''Add language attributes to <html> tags.
@@ -153,6 +168,16 @@ class AccessAide(Tool):
                 map = epubtype_aria_map.get(value, False)
 
                 if map and (tag in map['tag'] or tag in extra_tags):
+
+                    # EXCEPTIONS
+                    # skip if <img> doesn't have alt text
+                    if tag == 'img' and not node.get('alt'):
+                        continue
+
+                    # skip if <a> is not in map and has href value
+                    if tag == 'a' and \
+                       (tag not in map['tag'] and node.get('href')):
+                        continue
 
                     self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
@@ -241,9 +266,3 @@ class AccessAide(Tool):
                         container.insert_into_xml(metadata, element)
 
                         self.meta_stat.increase()
-
-                else:
-                    # metadata currently available only for EPUB v2 and v3
-                    return
-
-            container.dirty(container.opf_name)
