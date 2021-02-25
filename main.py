@@ -203,16 +203,12 @@ class AccessAide(Tool):
         runtime along with some statistics.
         '''
 
-        template = ('<h3>Routine completed</h3>'
-                    '<p>{lang_stat}<br>'
-                    '{aria_stat}<br>'
-                    '{meta_stat}</p>')
+        data = [self.lang_stat.report(),
+                self.aria_stat.report(),
+                self.meta_stat.report()]
 
-        data = {'lang_stat': self.lang_stat.report(),
-                'aria_stat': self.aria_stat.report(),
-                'meta_stat': self.meta_stat.report()}
+        return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
 
-        return template.format(**data)
 
     def add_metadata(self, container):
         ''' Add metadata to OPF file.
