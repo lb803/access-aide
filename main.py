@@ -42,9 +42,9 @@ class AccessAide(Tool):
     def __init__(self):
 
         # init stat counters
-        self.lang_stat = Stats()  # language tags
-        self.aria_stat = Stats()  # aria roles matches
-        self.meta_stat = Stats()  # metadata declarations
+        self.lang_stat = Stats(desc='Language attributes')
+        self.aria_stat = Stats(desc='Aria roles')
+        self.meta_stat = Stats(desc='Metadata declarations')
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -203,16 +203,12 @@ class AccessAide(Tool):
         runtime along with some statistics.
         '''
 
-        template = ('<h3>Routine completed</h3>'
-                    '<p>Language attributes added: {lang_stat}<br>'
-                    'Aria roles added: {aria_stat}<br>'
-                    'Metadata declarations added: {meta_stat}</p>')
+        data = [self.lang_stat.report(),
+                self.aria_stat.report(),
+                self.meta_stat.report()]
 
-        data = {'lang_stat': self.lang_stat.get(),
-                'aria_stat': self.aria_stat.get(),
-                'meta_stat': self.meta_stat.get()}
+        return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
 
-        return template.format(**data)
 
     def add_metadata(self, container):
         ''' Add metadata to OPF file.
