@@ -25,9 +25,6 @@ applies to this HTML fragment:
 </section>
 ```
 
-## Advanced notes
-Epub types and aria roles have a 1:1 relationship. However, these proprieties might apply to multiple HTML tags, hence the need to provide the 'tag' key with a list of 'value(s)'.
-
 # `extra-tags.json` file
 This files contains a list of additional HTML tags which accept any role value (on top of the ones already defined in `epubtype-aria-map.json`).
 
@@ -35,4 +32,4 @@ Exception has been made for `a` and `img` which are considered special cases as:
  -  `a` (accepted if without an href attribute)
  -  `img` (accepted only with alt text)
 
-These requirements add a new layer of complexity and I decided to hold on on this for the moment. Leaving the tags out of the list is just a precaution not to introduce issues into the epub file.
+These exceptions are hardcoded in the add_aria() method.
