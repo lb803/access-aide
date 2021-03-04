@@ -98,7 +98,12 @@ class AccessAide(Tool):
                 if doc.write_attrib(html_node, doc.NS_XMLLANG, lang):
                     self.lang_stat.increase()
 
-                self.add_aria(container.parsed(name))
+                # add aria roles
+                et_nodes = doc.get_et_nodes()
+
+                for node in et_nodes:
+                    if doc.add_aria(node):
+                        self.aria_stat.increase()
 
             elif media_type in OPF_MIME:
                 self.add_metadata(container)
@@ -132,65 +137,6 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         return lang
-
-    def add_aria(self, root):
-        '''Add aria roles.
-
-        This method finds nodes with epub:type attributes
-        and adds aria roles appropriately.
-        Before adding the new aria role, the node tag is checked against
-        a given list of possible tags and a list of allowed extra tags. Please,
-        refer to the documentation in the `./assets/` folder for more on this.
-        '''
-
-        # load maps
-        epubtype_aria_map = json.loads(
-                              get_resources('assets/epubtype-aria-map.json'))
-        extra_tags = json.loads(get_resources('assets/extra-tags.json'))
-
-        # find nodes with  an 'epub:type' attribute
-        nodes = root.xpath('//*[@epub:type]',
-                           namespaces={'epub': 'http://www.idpf.org/2007/ops'})
-
-        for node in nodes:
-
-            tag = lxml.etree.QName(node).localname
-            values = node.attrib['{http://www.idpf.org/2007/ops}type']
-
-            # iter over values, in case of epub:type overloading
-            for value in values.split(' '):
-
-                # get map for the 'value' key (if present)
-                map = epubtype_aria_map.get(value, False)
-
-                if map and (tag in map['tag'] or tag in extra_tags):
-
-                    # EXCEPTIONS
-                    # skip if <img> doesn't have alt text
-                    if tag == 'img' and not node.get('alt'):
-                        continue
-
-                    # skip if <a> is not in map and has href value
-                    if tag == 'a' and \
-                       (tag not in map['tag'] and node.get('href')):
-                        continue
-
-                    self.write_attrib(node, 'role', map['aria'], self.aria_stat)
-
-    def write_attrib(self, node, attribute, value, stat):
-        '''Write attributes to nodes.
-
-        Attributes are written if config has 'force_override' set
-        or if node is not present.
-        '''
-
-        if prefs['force_override'] \
-           or attribute not in node.attrib:
-
-            node.attrib[attribute] = value
-            stat.increase()
-
-        return
 
     def stats_report(self):
         '''Compose a short report on stats.
