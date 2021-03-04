@@ -32,6 +32,7 @@ from calibre_plugins.access_aide.config import prefs
 
 # My modules
 from .lib.stats import Stats
+from .lib.access import Access
 
 
 class AccessAide(Tool):
@@ -75,6 +76,8 @@ class AccessAide(Tool):
 
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
+        lang = self.get_lang(container)
+
         blacklist = ['toc.xhtml']
 
         # iterate over book files
@@ -83,8 +86,18 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
-                self.add_lang(container.parsed(name),
-                              self.get_lang(container))
+                doc = Access(container.parsed(name),
+                             override=prefs['force_override'])
+
+                # add language declarations
+                html_node = doc.get_html_node()
+
+                if doc.write_attrib(html_node, 'lang', lang):
+                    self.lang_stat.increase()
+
+                if doc.write_attrib(html_node, doc.NS_XMLLANG, lang):
+                    self.lang_stat.increase()
+
                 self.add_aria(container.parsed(name))
 
             elif media_type in OPF_MIME:
@@ -119,23 +132,6 @@ class AccessAide(Tool):
             return error_dialog(self.gui, 'Access Aide', message, show=True)
 
         return lang
-
-    def add_lang(self, root, lang):
-        '''Add language attributes to <html> tags.
-
-        This method finds the <html> tag of the given 'root' element
-        and adds language declarations. Changes are tracked and successes
-        increase a stat counter.
-        '''
-
-        html = root.xpath('//*[local-name()="html"]')[0]
-
-        # set lang for 'lang' attribute
-        self.write_attrib(html, 'lang', lang, self.lang_stat)
-
-        # set lang for 'xml:lang' attribute
-        self.write_attrib(html, '{http://www.w3.org/XML/1998/namespace}lang',
-                          lang, self.lang_stat)
 
     def add_aria(self, root):
         '''Add aria roles.
