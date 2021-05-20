@@ -28,7 +28,8 @@ prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
     'accessModeSufficient': ['textual'],
-    'accessibilityFeature': ['structuralNavigation']
+    'accessibilityFeature': ['structuralNavigation'],
+    'accessibilityHazard': ['unknown']
     }
 
 class ConfigWidget(QWidget):
@@ -111,6 +112,45 @@ class ConfigWidget(QWidget):
         access_layout.addWidget(self.acc_feat)
         self.label.setBuddy(self.acc_feat)
 
+        # accessibilityHazard
+        self.label5 = QLabel('Accessibility Hazard:')
+        access_layout.addWidget(self.label5)
+
+        self.acc_hazard_none = QCheckBox('&'+_('None'), self)
+        access_layout.addWidget(self.acc_hazard_none)
+        if 'none' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_none.setChecked(True)
+        else:
+            self.acc_hazard_none.setChecked(False)
+
+        self.acc_hazard_unknown = QCheckBox('&'+_('Unknown'), self)
+        access_layout.addWidget(self.acc_hazard_unknown)
+        if 'unknown' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_unknown.setChecked(True)
+        else:
+            self.acc_hazard_unknown.setChecked(False)
+
+        self.acc_hazard_f = QCheckBox('&'+_('Flashing'), self)
+        access_layout.addWidget(self.acc_hazard_f)
+        if 'flashing' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_f.setChecked(True)
+        else:
+            self.acc_hazard_f.setChecked(False)
+
+        self.acc_hazard_m = QCheckBox('&'+_('Motion Simulation'), self)
+        access_layout.addWidget(self.acc_hazard_m)
+        if 'motionSimulation' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_m.setChecked(True)
+        else:
+            self.acc_hazard_m.setChecked(False)
+
+        self.acc_hazard_s = QCheckBox('&'+_('Sound'), self)
+        access_layout.addWidget(self.acc_hazard_s)
+        if 'sound' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_s.setChecked(True)
+        else:
+            self.acc_hazard_s.setChecked(False)
+
 
     def save_settings(self):
 
@@ -130,10 +170,35 @@ class ConfigWidget(QWidget):
         else:
             access_mode_suff = 'visual'
 
+        # accessibilityHazard
+        access_hazard = []
+        if self.acc_hazard_none.isChecked():
+            access_hazard.append('none')
+
+        elif self.acc_hazard_unknown.isChecked():
+            access_hazard.append('unknown')
+
+        else:
+            if self.acc_hazard_f.isChecked():
+                access_hazard.append('flashing')
+            else:
+                access_hazard.append('noFlashingHazard')
+
+            if self.acc_hazard_m.isChecked():
+                access_hazard.append('motionSimulation')
+            else:
+                access_hazard.append('noMotionSimulationHazard')
+
+            if self.acc_hazard_s.isChecked():
+                access_hazard.append('sound')
+            else:
+                access_hazard.append('noSoundHazard')
+
         prefs['force_override'] = self.force_override.isChecked()
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
             'accessModeSufficient': [access_mode_suff],
-            'accessibilityFeature': [self.acc_feat.text()]
+            'accessibilityFeature': [self.acc_feat.text()],
+            'accessibilityHazard': access_hazard
             }
