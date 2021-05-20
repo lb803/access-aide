@@ -25,7 +25,8 @@ class Stats:
     and reset to zero.
     '''
 
-    def __init__(self):
+    def __init__(self, desc='Items'):
+        self.desc = desc
         self.value = 0
 
     def increase(self):
@@ -33,6 +34,9 @@ class Stats:
 
     def get(self):
         return self.value
+
+    def report(self):
+        return '{} added: {}'.format(self.desc, self.value)
 
     def reset(self):
         self.value = 0
