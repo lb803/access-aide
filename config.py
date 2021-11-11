@@ -39,16 +39,17 @@ class ConfigWidget(QWidget):
         self.l = QVBoxLayout()
         self.setLayout(self.l)
 
-        # Plugin options
-        options = QGroupBox(_('Options'), self)
-        self.l.addWidget(options)
-        options_layout = QHBoxLayout()
-        options.setLayout(options_layout)
+        # General preferences
+        general_box = QGroupBox(_('General'), self)
+        self.l.addWidget(general_box)
+        general_box_layout = QHBoxLayout()
+        general_box.setLayout(general_box_layout)
 
-        self.force_override = QCheckBox('&'+_('Force Override'), self)
-        self.force_override.setToolTip(_('When checked, existing attributes and value will be overwritten.'))
-        options_layout.addWidget(self.force_override)
-        self.force_override.setChecked(prefs['force_override'])
+        self.general_override_cb = QCheckBox('&'+_('Force Override'), self)
+        self.general_override_cb.setToolTip(_('When checked, existing '
+                                'attributes and value will be overwritten.'))
+        general_box_layout.addWidget(self.general_override_cb)
+        self.general_override_cb.setChecked(prefs['force_override'])
 
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
@@ -194,7 +195,7 @@ class ConfigWidget(QWidget):
             else:
                 access_hazard.append('noSoundHazard')
 
-        prefs['force_override'] = self.force_override.isChecked()
+        prefs['force_override'] = self.general_override_cb.isChecked()
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
