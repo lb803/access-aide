@@ -36,7 +36,7 @@ class ConfigWidget(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
-        self.l = QHBoxLayout()
+        self.l = QVBoxLayout()
         self.setLayout(self.l)
 
         # Plugin options
