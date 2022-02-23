@@ -51,6 +51,21 @@ class ConfigWidget(QWidget):
         general_box_layout.addWidget(self.general_override_cb)
         self.general_override_cb.setChecked(prefs['force_override'])
 
+        # Heuristic
+        heuristic_box = QGroupBox(_('Heuristic'), self)
+        self.l.addWidget(heuristic_box)
+        heuristic_box_layout = QHBoxLayout()
+        heuristic_box.setLayout(heuristic_box_layout)
+
+        self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
+                                                        'with <h1>'), self)
+        self.heuristic_title_override.setToolTip(_('When checked, replace the '
+                                              'existing <title> text with the '
+                                              'first <h1> found on the page'))
+        heuristic_box_layout.addWidget(self.heuristic_title_override)
+#        self.heuristic_title_override.setChecked(prefs['title_override'])
+        
+
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
         self.l.addWidget(access)
