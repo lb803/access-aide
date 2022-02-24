@@ -25,7 +25,8 @@ prefs = JSONConfig('plugins/access_aide')
 # Set defaults
 prefs.defaults['force_override'] = False
 prefs.defaults['heuristic'] = {
-    'title_override': False
+    'title_override': False,
+    'type_footnotes': False
     }
 prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
@@ -57,7 +58,7 @@ class ConfigWidget(QWidget):
         # Heuristic
         heuristic_box = QGroupBox(_('Heuristic'), self)
         self.l.addWidget(heuristic_box)
-        heuristic_box_layout = QHBoxLayout()
+        heuristic_box_layout = QVBoxLayout()
         heuristic_box.setLayout(heuristic_box_layout)
 
         self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
@@ -69,8 +70,21 @@ class ConfigWidget(QWidget):
         try:
             self.heuristic_title_override \
                 .setChecked(prefs['heuristic']['title_override'])
-        except NameError:
+        except KeyError:
             self.heuristic_title_override.setChecked(False)
+
+
+        self.heuristic_type_footnotes = QCheckBox('&'+_('Add epub:type to '
+                                                        'footnote marks'), self)
+        self.heuristic_type_footnotes.setToolTip(_('When checked, adds '
+                                                   'corresponding epub:type '
+                                                   'to footnote marks.'))
+        heuristic_box_layout.addWidget(self.heuristic_type_footnotes)
+        try:
+            self.heuristic_type_footnotes \
+                .setChecked(prefs['heuristic']['type_footnotes'])
+        except KeyError:
+            self.heuristic_type_footnotes.setChecked(False)
         
 
         # Accessibility options
@@ -219,7 +233,8 @@ class ConfigWidget(QWidget):
 
         prefs['force_override'] = self.general_override_cb.isChecked()
         prefs['heuristic'] = {
-            'title_override': self.heuristic_title_override.isChecked()
+            'title_override': self.heuristic_title_override.isChecked(),
+            'type_footnotes': self.heuristic_type_footnotes.isChecked()
             }
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
