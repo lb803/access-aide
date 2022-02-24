@@ -24,6 +24,9 @@ prefs = JSONConfig('plugins/access_aide')
 
 # Set defaults
 prefs.defaults['force_override'] = False
+prefs.defaults['heuristic'] = {
+    'title_override': False
+    }
 prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
@@ -50,6 +53,25 @@ class ConfigWidget(QWidget):
                                 'attributes and value will be overwritten.'))
         general_box_layout.addWidget(self.general_override_cb)
         self.general_override_cb.setChecked(prefs['force_override'])
+
+        # Heuristic
+        heuristic_box = QGroupBox(_('Heuristic'), self)
+        self.l.addWidget(heuristic_box)
+        heuristic_box_layout = QHBoxLayout()
+        heuristic_box.setLayout(heuristic_box_layout)
+
+        self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
+                                                        'with <h1>'), self)
+        self.heuristic_title_override.setToolTip(_('When checked, replaces '
+                                          'the existing <title> text with'
+                                          'the first <h1> found on the page'))
+        heuristic_box_layout.addWidget(self.heuristic_title_override)
+        try:
+            self.heuristic_title_override \
+                .setChecked(prefs['heuristic']['title_override'])
+        except NameError:
+            self.heuristic_title_override.setChecked(False)
+        
 
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
@@ -196,6 +218,9 @@ class ConfigWidget(QWidget):
                 access_hazard.append('noSoundHazard')
 
         prefs['force_override'] = self.general_override_cb.isChecked()
+        prefs['heuristic'] = {
+            'title_override': self.heuristic_title_override.isChecked()
+            }
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
