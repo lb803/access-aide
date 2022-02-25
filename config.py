@@ -24,6 +24,10 @@ prefs = JSONConfig('plugins/access_aide')
 
 # Set defaults
 prefs.defaults['force_override'] = False
+prefs.defaults['heuristic'] = {
+    'title_override': False,
+    'type_footnotes': False
+    }
 prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
@@ -36,19 +40,52 @@ class ConfigWidget(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
-        self.l = QHBoxLayout()
+        self.l = QVBoxLayout()
         self.setLayout(self.l)
 
-        # Plugin options
-        options = QGroupBox(_('Options'), self)
-        self.l.addWidget(options)
-        options_layout = QHBoxLayout()
-        options.setLayout(options_layout)
+        # General preferences
+        general_box = QGroupBox(_('General'), self)
+        self.l.addWidget(general_box)
+        general_box_layout = QHBoxLayout()
+        general_box.setLayout(general_box_layout)
 
-        self.force_override = QCheckBox('&'+_('Force Override'), self)
-        self.force_override.setToolTip(_('When checked, existing attributes and value will be overwritten.'))
-        options_layout.addWidget(self.force_override)
-        self.force_override.setChecked(prefs['force_override'])
+        self.general_override_cb = QCheckBox('&'+_('Force Override'), self)
+        self.general_override_cb.setToolTip(_('When checked, existing '
+                                'attributes and value will be overwritten.'))
+        general_box_layout.addWidget(self.general_override_cb)
+        self.general_override_cb.setChecked(prefs['force_override'])
+
+        # Heuristic
+        heuristic_box = QGroupBox(_('Heuristic'), self)
+        self.l.addWidget(heuristic_box)
+        heuristic_box_layout = QVBoxLayout()
+        heuristic_box.setLayout(heuristic_box_layout)
+
+        self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
+                                                        'with <h1>'), self)
+        self.heuristic_title_override.setToolTip(_('When checked, replaces '
+                                          'the existing <title> text with'
+                                          'the first <h1> found on the page'))
+        heuristic_box_layout.addWidget(self.heuristic_title_override)
+        try:
+            self.heuristic_title_override \
+                .setChecked(prefs['heuristic']['title_override'])
+        except KeyError:
+            self.heuristic_title_override.setChecked(False)
+
+
+        self.heuristic_type_footnotes = QCheckBox('&'+_('Add epub:type to '
+                                                        'footnote marks'), self)
+        self.heuristic_type_footnotes.setToolTip(_('When checked, adds '
+                                                   'corresponding epub:type '
+                                                   'to footnote marks.'))
+        heuristic_box_layout.addWidget(self.heuristic_type_footnotes)
+        try:
+            self.heuristic_type_footnotes \
+                .setChecked(prefs['heuristic']['type_footnotes'])
+        except KeyError:
+            self.heuristic_type_footnotes.setChecked(False)
+        
 
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
@@ -194,7 +231,11 @@ class ConfigWidget(QWidget):
             else:
                 access_hazard.append('noSoundHazard')
 
-        prefs['force_override'] = self.force_override.isChecked()
+        prefs['force_override'] = self.general_override_cb.isChecked()
+        prefs['heuristic'] = {
+            'title_override': self.heuristic_title_override.isChecked(),
+            'type_footnotes': self.heuristic_type_footnotes.isChecked()
+            }
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,

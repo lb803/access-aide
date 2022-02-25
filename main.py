@@ -45,6 +45,8 @@ class AccessAide(Tool):
         self.lang_stat = Stats(desc='Language attributes')
         self.aria_stat = Stats(desc='Aria roles')
         self.meta_stat = Stats(desc='Metadata declarations')
+        self.title_stat = Stats(desc='Text content of &lt;title&gt; tags')
+        self.fn_stat = Stats(desc='epub:type to footnote marks')
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -83,6 +85,11 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
+                if prefs['heuristic']['title_override']:
+                    self.override_title(container.parsed(name))
+                if prefs['heuristic']['type_footnotes']:
+                    self.add_fn_type(container.parsed(name))
+
                 self.add_lang(container.parsed(name),
                               self.get_lang(container))
                 self.add_aria(container.parsed(name))
@@ -100,6 +107,8 @@ class AccessAide(Tool):
         self.lang_stat.reset()
         self.aria_stat.reset()
         self.meta_stat.reset()
+        self.title_stat.reset()
+        self.fn_stat.reset()
 
         # update the editor UI
         self.boss.apply_container_update_to_gui()
@@ -181,6 +190,44 @@ class AccessAide(Tool):
 
                     self.write_attrib(node, 'role', map['aria'], self.aria_stat)
 
+    def override_title(self, root):
+        '''Replace the text content of the <title> tag with the one of <h1>
+
+        This method finds the first <h1> tag of the given 'root' element
+        and override the text of <title> in the header.
+        Changes are tracked and successes increase a stat counter.
+        '''
+
+        try:
+            title = root.xpath('//*[local-name()="title"]')[0]
+            h1 = root.xpath('//*[local-name()="h1"]')[0]
+        except IndexError:
+            return
+
+        h1_text = ''.join(h1.itertext())
+
+        self.write_text(title, h1_text, self.title_stat)
+
+    def add_fn_type(self, root):
+        '''Add epub:role to footnote markers and references
+
+        This method finds footnote markers and references on the page
+        and adds the corresponding epub:type(s). Hardcoded class values
+        to find fn markers and references assume the book has been produced
+        with InDesign.
+        Changes are tracked and successes increase a stat counter.
+        '''
+
+        fn_markers_xpath = '//*[contains(@class, "_idFootnoteLink")]'
+        for fn_marker in root.xpath(fn_markers_xpath):
+            self.write_attrib(fn_marker, '{http://www.idpf.org/2007/ops}type',
+                              'noteref', self.fn_stat)
+
+        fn_backlink_xpath = '//*[contains(@class, "_idFootnoteAnchor")]'
+        for fn_backlink in root.xpath(fn_backlink_xpath):
+            self.write_attrib(fn_backlink, 'role',
+                              'doc-backlink', self.aria_stat)
+
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
@@ -196,6 +243,21 @@ class AccessAide(Tool):
 
         return
 
+    def write_text(self, node, value, stat):
+        '''Write text to nodes.
+
+        Text is written if config has 'force_override' set
+        or if node text differs.
+        '''
+
+        if prefs['force_override'] \
+           or ''.join(node.itertext()) != value:
+
+            node.text = value
+            stat.increase()
+
+        return
+
     def stats_report(self):
         '''Compose a short report on stats.
 
@@ -206,6 +268,11 @@ class AccessAide(Tool):
         data = [self.lang_stat.report(),
                 self.aria_stat.report(),
                 self.meta_stat.report()]
+
+        if prefs['heuristic']['title_override']:
+            data.append(self.title_stat.report())
+        if prefs['heuristic']['type_footnotes']:
+            data.append(self.fn_stat.report())
 
         return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
 
