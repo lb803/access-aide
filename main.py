@@ -46,7 +46,7 @@ class AccessAide(Tool):
         self.aria_stat = Stats(desc='Aria roles')
         self.meta_stat = Stats(desc='Metadata declarations')
         self.title_stat = Stats(desc='Text content of &lt;title&gt; tags')
-        self.fn_stat = Stats(desc='epub:type to footnote marks')
+        self.fn_stat = Stats(desc='epub:type to footnote and endnote marks')
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -218,12 +218,14 @@ class AccessAide(Tool):
         Changes are tracked and successes increase a stat counter.
         '''
 
-        fn_markers_xpath = '//*[contains(@class, "_idFootnoteLink")]'
+        fn_markers_xpath = '//*[contains(@class, "_idFootnoteLink") or ' \
+                               'contains(@class, "_idEndnoteLink")]'
         for fn_marker in root.xpath(fn_markers_xpath):
             self.write_attrib(fn_marker, '{http://www.idpf.org/2007/ops}type',
                               'noteref', self.fn_stat)
 
-        fn_backlink_xpath = '//*[contains(@class, "_idFootnoteAnchor")]'
+        fn_backlink_xpath = '//*[contains(@class, "_idFootnoteAnchor") or ' \
+                                'contains(@class, "_idEndnoteAnchor")]'
         for fn_backlink in root.xpath(fn_backlink_xpath):
             self.write_attrib(fn_backlink, 'role',
                               'doc-backlink', self.aria_stat)

@@ -75,10 +75,12 @@ class ConfigWidget(QWidget):
 
 
         self.heuristic_type_footnotes = QCheckBox('&'+_('Add epub:type to '
-                                                        'footnote marks'), self)
+                                                        'footnote and endnote '
+                                                        'marks'), self)
         self.heuristic_type_footnotes.setToolTip(_('When checked, adds '
                                                    'corresponding epub:type '
-                                                   'to footnote marks.'))
+                                                   'to footnote and endnote '
+                                                   'marks.'))
         heuristic_box_layout.addWidget(self.heuristic_type_footnotes)
         try:
             self.heuristic_type_footnotes \
