@@ -105,94 +105,98 @@ class ConfigWidget(QWidget):
         acc_summ_label.setBuddy(self.acc_summ)
 
         # accessMode
-        # self.label2 = QLabel('Access Mode:')
-        # access_layout.addWidget(self.label2)
+        acc_mode_label = QLabel(self)
+        acc_mode_label.setText('Access Mode:')
+        
+        self.acc_mode_t = QCheckBox('Textual', self)
+        if 'textual' in prefs['access']['accessMode']:
+            self.acc_mode_t.setChecked(True)
+        else:
+            self.acc_mode_t.setChecked(False)
 
-        # self.acc_mode_t = QCheckBox('&'+_('Textual'), self)
-        # access_layout.addWidget(self.acc_mode_t)
-        # if 'textual' in prefs['access']['accessMode']:
-        #     self.acc_mode_t.setChecked(True)
-        # else:
-        #     self.acc_mode_t.setChecked(False)
-
-        # self.acc_mode_v = QCheckBox('&'+_('Visual'), self)
-        # access_layout.addWidget(self.acc_mode_v)
-
-        # if 'visual' in prefs['access']['accessMode']:
-        #     self.acc_mode_v.setChecked(True)
-
-        # else:
-        #     self.acc_mode_v.setChecked(False)
+        self.acc_mode_v = QCheckBox('Visual', self)
+        if 'visual' in prefs['access']['accessMode']:
+            self.acc_mode_v.setChecked(True)
+        else:
+            self.acc_mode_v.setChecked(False)
 
         # accessModeSufficient
-        # self.label3 = QLabel('Access Mode Sufficient:')
-        # access_layout.addWidget(self.label3)
+        acc_suff_label = QLabel(self)
+        acc_suff_label.setText('Access Mode Sufficient:')
 
-        # self.acc_suff_t = QRadioButton('Textual')
+        self.acc_suff_t = QRadioButton('Textual')
+        if 'textual' in prefs['access']['accessModeSufficient']:
+            self.acc_suff_t.setChecked(True)
 
-        # if 'textual' in prefs['access']['accessModeSufficient']:
-        #     self.acc_suff_t.setChecked(True)
-
-        # access_layout.addWidget(self.acc_suff_t)
-
-        # self.acc_suff_v = QRadioButton('Visual')
-
-        # if 'visual' in prefs['access']['accessModeSufficient']:
-        #     self.acc_suff_v.setChecked(True)
-
-        # access_layout.addWidget(self.acc_suff_v)
+        self.acc_suff_v = QRadioButton('Visual')
+        if 'visual' in prefs['access']['accessModeSufficient']:
+            self.acc_suff_v.setChecked(True)
 
         # accessibilityFeature
-        # self.label4 = QLabel('Accessibility Feature:')
-        # access_layout.addWidget(self.label4)
+        acc_feat_label = QLabel(self)
+        acc_feat_label.setText('Accessibility Feature:')
 
-        # self.acc_feat = QLineEdit(self)
-        # self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
-        # access_layout.addWidget(self.acc_feat)
-        # self.label.setBuddy(self.acc_feat)
+        self.acc_feat = QLineEdit(self)
+        self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
+        acc_feat_label.setBuddy(self.acc_feat)
 
         # accessibilityHazard
-        # self.label5 = QLabel('Accessibility Hazard:')
-        # access_layout.addWidget(self.label5)
+        acc_hazard_label = QLabel(self)
+        acc_hazard_label.setText('Accessibility Hazard:')
 
-        # self.acc_hazard_none = QCheckBox('&'+_('None'), self)
-        # access_layout.addWidget(self.acc_hazard_none)
-        # if 'none' in prefs['access'].get('accessibilityHazard', []):
-        #     self.acc_hazard_none.setChecked(True)
-        # else:
-        #     self.acc_hazard_none.setChecked(False)
+        self.acc_hazard_none = QCheckBox('None', self)
+        if 'none' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_none.setChecked(True)
+        else:
+            self.acc_hazard_none.setChecked(False)
 
-        # self.acc_hazard_unknown = QCheckBox('&'+_('Unknown'), self)
-        # access_layout.addWidget(self.acc_hazard_unknown)
-        # if 'unknown' in prefs['access'].get('accessibilityHazard', []):
-        #     self.acc_hazard_unknown.setChecked(True)
-        # else:
-        #     self.acc_hazard_unknown.setChecked(False)
+        self.acc_hazard_unknown = QCheckBox('Unknown', self)
+        if 'unknown' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_unknown.setChecked(True)
+        else:
+            self.acc_hazard_unknown.setChecked(False)
 
-        # self.acc_hazard_f = QCheckBox('&'+_('Flashing'), self)
-        # access_layout.addWidget(self.acc_hazard_f)
-        # if 'flashing' in prefs['access'].get('accessibilityHazard', []):
-        #     self.acc_hazard_f.setChecked(True)
-        # else:
-        #     self.acc_hazard_f.setChecked(False)
+        self.acc_hazard_f = QCheckBox('Flashing', self)
+        if 'flashing' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_f.setChecked(True)
+        else:
+            self.acc_hazard_f.setChecked(False)
 
-        # self.acc_hazard_m = QCheckBox('&'+_('Motion Simulation'), self)
-        # access_layout.addWidget(self.acc_hazard_m)
-        # if 'motionSimulation' in prefs['access'].get('accessibilityHazard', []):
-        #     self.acc_hazard_m.setChecked(True)
-        # else:
-        #     self.acc_hazard_m.setChecked(False)
+        self.acc_hazard_m = QCheckBox('Motion Simulation', self)
+        if 'motionSimulation' in prefs['access'] \
+                                 .get('accessibilityHazard', []):
+            self.acc_hazard_m.setChecked(True)
+        else:
+            self.acc_hazard_m.setChecked(False)
 
-        # self.acc_hazard_s = QCheckBox('&'+_('Sound'), self)
-        # access_layout.addWidget(self.acc_hazard_s)
-        # if 'sound' in prefs['access'].get('accessibilityHazard', []):
-        #     self.acc_hazard_s.setChecked(True)
-        # else:
-        #     self.acc_hazard_s.setChecked(False)
+        self.acc_hazard_s = QCheckBox('Sound', self)
+        if 'sound' in prefs['access'].get('accessibilityHazard', []):
+            self.acc_hazard_s.setChecked(True)
+        else:
+            self.acc_hazard_s.setChecked(False)
 
         vbox = QVBoxLayout()
         vbox.addWidget(acc_summ_label)
         vbox.addWidget(self.acc_summ)
+
+        vbox.addWidget(acc_mode_label)
+        vbox.addWidget(self.acc_mode_t)
+        vbox.addWidget(self.acc_mode_v)
+
+        vbox.addWidget(acc_suff_label)
+        vbox.addWidget(self.acc_suff_t)
+        vbox.addWidget(self.acc_suff_v)
+
+        vbox.addWidget(acc_feat_label)
+        vbox.addWidget(self.acc_feat)
+
+        vbox.addWidget(acc_hazard_label)
+        vbox.addWidget(self.acc_hazard_none)
+        vbox.addWidget(self.acc_hazard_unknown)
+        vbox.addWidget(self.acc_hazard_f)
+        vbox.addWidget(self.acc_hazard_m)
+        vbox.addWidget(self.acc_hazard_s)
+        
         vbox.addStretch(1)
         group_box.setLayout(vbox)
 
