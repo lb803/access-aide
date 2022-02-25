@@ -42,116 +42,11 @@ class ConfigWidget(QWidget):
         QWidget.__init__(self)
 
         grid = QGridLayout()
-        grid.addWidget(self.general_group(), 0, 0)
-        grid.addWidget(self.heuristic_group(), 0, 1)
-        grid.addWidget(self.general_group(), 1, 0)
-        grid.addWidget(self.general_group(), 1, 1)
+        grid.addWidget(self.general_group(), 0, 0, 1, 1)
+        grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
+        grid.addWidget(self.access_group(), 1, 0, 1, 2)
         self.setLayout(grid)
         
-        self.l = QVBoxLayout()
-        self.setLayout(self.l)
-
-        # Accessibility options
-        access = QGroupBox(_('Accessibility'), self)
-        self.l.addWidget(access)
-        access_layout = QVBoxLayout()
-        access.setLayout(access_layout)
-
-        # accessibilitySummary
-        self.label = QLabel('Accessibility Summary:')
-        access_layout.addWidget(self.label)
-
-        self.acc_summ = QLineEdit(self)
-        self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
-        access_layout.addWidget(self.acc_summ)
-        self.label.setBuddy(self.acc_summ)
-
-        # accessMode
-        self.label2 = QLabel('Access Mode:')
-        access_layout.addWidget(self.label2)
-
-        self.acc_mode_t = QCheckBox('&'+_('Textual'), self)
-        access_layout.addWidget(self.acc_mode_t)
-        if 'textual' in prefs['access']['accessMode']:
-            self.acc_mode_t.setChecked(True)
-        else:
-            self.acc_mode_t.setChecked(False)
-
-        self.acc_mode_v = QCheckBox('&'+_('Visual'), self)
-        access_layout.addWidget(self.acc_mode_v)
-
-        if 'visual' in prefs['access']['accessMode']:
-            self.acc_mode_v.setChecked(True)
-
-        else:
-            self.acc_mode_v.setChecked(False)
-
-        # accessModeSufficient
-        self.label3 = QLabel('Access Mode Sufficient:')
-        access_layout.addWidget(self.label3)
-
-        self.acc_suff_t = QRadioButton('Textual')
-
-        if 'textual' in prefs['access']['accessModeSufficient']:
-            self.acc_suff_t.setChecked(True)
-
-        access_layout.addWidget(self.acc_suff_t)
-
-        self.acc_suff_v = QRadioButton('Visual')
-
-        if 'visual' in prefs['access']['accessModeSufficient']:
-            self.acc_suff_v.setChecked(True)
-
-        access_layout.addWidget(self.acc_suff_v)
-
-        # accessibilityFeature
-        self.label4 = QLabel('Accessibility Feature:')
-        access_layout.addWidget(self.label4)
-
-        self.acc_feat = QLineEdit(self)
-        self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
-        access_layout.addWidget(self.acc_feat)
-        self.label.setBuddy(self.acc_feat)
-
-        # accessibilityHazard
-        self.label5 = QLabel('Accessibility Hazard:')
-        access_layout.addWidget(self.label5)
-
-        self.acc_hazard_none = QCheckBox('&'+_('None'), self)
-        access_layout.addWidget(self.acc_hazard_none)
-        if 'none' in prefs['access'].get('accessibilityHazard', []):
-            self.acc_hazard_none.setChecked(True)
-        else:
-            self.acc_hazard_none.setChecked(False)
-
-        self.acc_hazard_unknown = QCheckBox('&'+_('Unknown'), self)
-        access_layout.addWidget(self.acc_hazard_unknown)
-        if 'unknown' in prefs['access'].get('accessibilityHazard', []):
-            self.acc_hazard_unknown.setChecked(True)
-        else:
-            self.acc_hazard_unknown.setChecked(False)
-
-        self.acc_hazard_f = QCheckBox('&'+_('Flashing'), self)
-        access_layout.addWidget(self.acc_hazard_f)
-        if 'flashing' in prefs['access'].get('accessibilityHazard', []):
-            self.acc_hazard_f.setChecked(True)
-        else:
-            self.acc_hazard_f.setChecked(False)
-
-        self.acc_hazard_m = QCheckBox('&'+_('Motion Simulation'), self)
-        access_layout.addWidget(self.acc_hazard_m)
-        if 'motionSimulation' in prefs['access'].get('accessibilityHazard', []):
-            self.acc_hazard_m.setChecked(True)
-        else:
-            self.acc_hazard_m.setChecked(False)
-
-        self.acc_hazard_s = QCheckBox('&'+_('Sound'), self)
-        access_layout.addWidget(self.acc_hazard_s)
-        if 'sound' in prefs['access'].get('accessibilityHazard', []):
-            self.acc_hazard_s.setChecked(True)
-        else:
-            self.acc_hazard_s.setChecked(False)
-
     def general_group(self):
         group_box = QGroupBox('General Preferences', self)
 
@@ -169,7 +64,7 @@ class ConfigWidget(QWidget):
         return group_box
 
     def heuristic_group(self):
-        group_box = QGroupBox('Heuristic', self)
+        group_box = QGroupBox('Heuristic Options', self)
 
         self.title_override = QCheckBox('Match <title> text with <h1>', self)
         self.title_override.setToolTip('When checked, replaces '
@@ -193,6 +88,111 @@ class ConfigWidget(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(self.title_override)
         vbox.addWidget(self.type_fn)
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
+
+        return group_box
+
+    def access_group(self):
+        group_box = QGroupBox('Accessibility', self)
+
+        # accessibilitySummary
+        acc_summ_label = QLabel(self)
+        acc_summ_label.setText('Accessibility Summary:')
+
+        self.acc_summ = QLineEdit(self)
+        self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
+        acc_summ_label.setBuddy(self.acc_summ)
+
+        # accessMode
+        # self.label2 = QLabel('Access Mode:')
+        # access_layout.addWidget(self.label2)
+
+        # self.acc_mode_t = QCheckBox('&'+_('Textual'), self)
+        # access_layout.addWidget(self.acc_mode_t)
+        # if 'textual' in prefs['access']['accessMode']:
+        #     self.acc_mode_t.setChecked(True)
+        # else:
+        #     self.acc_mode_t.setChecked(False)
+
+        # self.acc_mode_v = QCheckBox('&'+_('Visual'), self)
+        # access_layout.addWidget(self.acc_mode_v)
+
+        # if 'visual' in prefs['access']['accessMode']:
+        #     self.acc_mode_v.setChecked(True)
+
+        # else:
+        #     self.acc_mode_v.setChecked(False)
+
+        # accessModeSufficient
+        # self.label3 = QLabel('Access Mode Sufficient:')
+        # access_layout.addWidget(self.label3)
+
+        # self.acc_suff_t = QRadioButton('Textual')
+
+        # if 'textual' in prefs['access']['accessModeSufficient']:
+        #     self.acc_suff_t.setChecked(True)
+
+        # access_layout.addWidget(self.acc_suff_t)
+
+        # self.acc_suff_v = QRadioButton('Visual')
+
+        # if 'visual' in prefs['access']['accessModeSufficient']:
+        #     self.acc_suff_v.setChecked(True)
+
+        # access_layout.addWidget(self.acc_suff_v)
+
+        # accessibilityFeature
+        # self.label4 = QLabel('Accessibility Feature:')
+        # access_layout.addWidget(self.label4)
+
+        # self.acc_feat = QLineEdit(self)
+        # self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
+        # access_layout.addWidget(self.acc_feat)
+        # self.label.setBuddy(self.acc_feat)
+
+        # accessibilityHazard
+        # self.label5 = QLabel('Accessibility Hazard:')
+        # access_layout.addWidget(self.label5)
+
+        # self.acc_hazard_none = QCheckBox('&'+_('None'), self)
+        # access_layout.addWidget(self.acc_hazard_none)
+        # if 'none' in prefs['access'].get('accessibilityHazard', []):
+        #     self.acc_hazard_none.setChecked(True)
+        # else:
+        #     self.acc_hazard_none.setChecked(False)
+
+        # self.acc_hazard_unknown = QCheckBox('&'+_('Unknown'), self)
+        # access_layout.addWidget(self.acc_hazard_unknown)
+        # if 'unknown' in prefs['access'].get('accessibilityHazard', []):
+        #     self.acc_hazard_unknown.setChecked(True)
+        # else:
+        #     self.acc_hazard_unknown.setChecked(False)
+
+        # self.acc_hazard_f = QCheckBox('&'+_('Flashing'), self)
+        # access_layout.addWidget(self.acc_hazard_f)
+        # if 'flashing' in prefs['access'].get('accessibilityHazard', []):
+        #     self.acc_hazard_f.setChecked(True)
+        # else:
+        #     self.acc_hazard_f.setChecked(False)
+
+        # self.acc_hazard_m = QCheckBox('&'+_('Motion Simulation'), self)
+        # access_layout.addWidget(self.acc_hazard_m)
+        # if 'motionSimulation' in prefs['access'].get('accessibilityHazard', []):
+        #     self.acc_hazard_m.setChecked(True)
+        # else:
+        #     self.acc_hazard_m.setChecked(False)
+
+        # self.acc_hazard_s = QCheckBox('&'+_('Sound'), self)
+        # access_layout.addWidget(self.acc_hazard_s)
+        # if 'sound' in prefs['access'].get('accessibilityHazard', []):
+        #     self.acc_hazard_s.setChecked(True)
+        # else:
+        #     self.acc_hazard_s.setChecked(False)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(acc_summ_label)
+        vbox.addWidget(self.acc_summ)
         vbox.addStretch(1)
         group_box.setLayout(vbox)
 
