@@ -46,6 +46,7 @@ class AccessAide(Tool):
         self.aria_stat = Stats(desc='Aria roles')
         self.meta_stat = Stats(desc='Metadata declarations')
         self.title_stat = Stats(desc='Text content of &lt;title&gt; tags')
+        self.fn_stat = Stats(desc='epub:type to footnote marks')
 
     def create_action(self, for_toolbar=True):
         ac = QAction(get_icons('icon/icon.png'), 'Access Aide', self.gui)
@@ -86,6 +87,8 @@ class AccessAide(Tool):
 
                 if prefs['heuristic']['title_override']:
                     self.override_title(container.parsed(name))
+                if prefs['heuristic']['type_footnotes']:
+                    self.add_fn_type(container.parsed(name))
 
                 self.add_lang(container.parsed(name),
                               self.get_lang(container))
@@ -105,6 +108,7 @@ class AccessAide(Tool):
         self.aria_stat.reset()
         self.meta_stat.reset()
         self.title_stat.reset()
+        self.fn_stat.reset()
 
         # update the editor UI
         self.boss.apply_container_update_to_gui()
@@ -204,6 +208,26 @@ class AccessAide(Tool):
 
         self.write_text(title, h1_text, self.title_stat)
 
+    def add_fn_type(self, root):
+        '''Add epub:role to footnote markers and references
+
+        This method finds footnote markers and references on the page
+        and adds the corresponding epub:type(s). Hardcoded class values
+        to find fn markers and references assume the book has been produced
+        with InDesign.
+        Changes are tracked and successes increase a stat counter.
+        '''
+
+        fn_markers_xpath = '//*[contains(@class, "_idFootnoteLink")]'
+        for fn_marker in root.xpath(fn_markers_xpath):
+            self.write_attrib(fn_marker, '{http://www.idpf.org/2007/ops}type',
+                              'noteref', self.fn_stat)
+
+        fn_backlink_xpath = '//*[contains(@class, "_idFootnoteAnchor")]'
+        for fn_backlink in root.xpath(fn_backlink_xpath):
+            self.write_attrib(fn_backlink, 'role',
+                              'doc-backlink', self.aria_stat)
+
     def write_attrib(self, node, attribute, value, stat):
         '''Write attributes to nodes.
 
@@ -247,6 +271,8 @@ class AccessAide(Tool):
 
         if prefs['heuristic']['title_override']:
             data.append(self.title_stat.report())
+        if prefs['heuristic']['type_footnotes']:
+            data.append(self.fn_stat.report())
 
         return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
 
