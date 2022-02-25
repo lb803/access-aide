@@ -43,47 +43,13 @@ class ConfigWidget(QWidget):
 
         grid = QGridLayout()
         grid.addWidget(self.general_group(), 0, 0)
-        grid.addWidget(self.general_group(), 0, 1)
+        grid.addWidget(self.heuristic_group(), 0, 1)
         grid.addWidget(self.general_group(), 1, 0)
         grid.addWidget(self.general_group(), 1, 1)
         self.setLayout(grid)
         
         self.l = QVBoxLayout()
         self.setLayout(self.l)
-
-        # Heuristic
-        heuristic_box = QGroupBox(_('Heuristic'), self)
-        self.l.addWidget(heuristic_box)
-        heuristic_box_layout = QVBoxLayout()
-        heuristic_box.setLayout(heuristic_box_layout)
-
-        self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
-                                                        'with <h1>'), self)
-        self.heuristic_title_override.setToolTip(_('When checked, replaces '
-                                          'the existing <title> text with'
-                                          'the first <h1> found on the page'))
-        heuristic_box_layout.addWidget(self.heuristic_title_override)
-        try:
-            self.heuristic_title_override \
-                .setChecked(prefs['heuristic']['title_override'])
-        except KeyError:
-            self.heuristic_title_override.setChecked(False)
-
-
-        self.heuristic_type_footnotes = QCheckBox('&'+_('Add epub:type to '
-                                                        'footnote and endnote '
-                                                        'marks'), self)
-        self.heuristic_type_footnotes.setToolTip(_('When checked, adds '
-                                                   'corresponding epub:type '
-                                                   'to footnote and endnote '
-                                                   'marks.'))
-        heuristic_box_layout.addWidget(self.heuristic_type_footnotes)
-        try:
-            self.heuristic_type_footnotes \
-                .setChecked(prefs['heuristic']['type_footnotes'])
-        except KeyError:
-            self.heuristic_type_footnotes.setChecked(False)
-        
 
         # Accessibility options
         access = QGroupBox(_('Accessibility'), self)
@@ -202,6 +168,36 @@ class ConfigWidget(QWidget):
 
         return group_box
 
+    def heuristic_group(self):
+        group_box = QGroupBox('Heuristic', self)
+
+        self.title_override = QCheckBox('Match <title> text with <h1>', self)
+        self.title_override.setToolTip('When checked, replaces '
+                                       'the existing <title> text with'
+                                       'the first <h1> found on the page')
+        try:
+            self.title_override \
+                .setChecked(prefs['heuristic']['title_override'])
+        except KeyError:
+            self.title_override.setChecked(False)
+
+        self.type_fn = QCheckBox('Add epub:type to footnote and endnote '
+                                 'marks', self)
+        self.type_fn.setToolTip('When checked, adds corresponding epub:type '
+                                'to footnote and endnote marks.')
+        try:
+            self.type_fn.setChecked(prefs['heuristic']['type_footnotes'])
+        except KeyError:
+            self.type_fn.setChecked(False)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.title_override)
+        vbox.addWidget(self.type_fn)
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
+
+        return group_box
+
     def save_settings(self):
 
         # accessMode
@@ -246,8 +242,8 @@ class ConfigWidget(QWidget):
 
         prefs['force_override'] = self.force_override.isChecked()
         prefs['heuristic'] = {
-            'title_override': self.heuristic_title_override.isChecked(),
-            'type_footnotes': self.heuristic_type_footnotes.isChecked()
+            'title_override': self.title_override.isChecked(),
+            'type_footnotes': self.type_fn.isChecked()
             }
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
