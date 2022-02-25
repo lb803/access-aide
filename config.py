@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout
 from calibre.utils.config import JSONConfig
 
 prefs = JSONConfig('plugins/access_aide')
@@ -40,20 +40,16 @@ class ConfigWidget(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
+
+        grid = QGridLayout()
+        grid.addWidget(self.general_group(), 0, 0)
+        grid.addWidget(self.general_group(), 0, 1)
+        grid.addWidget(self.general_group(), 1, 0)
+        grid.addWidget(self.general_group(), 1, 1)
+        self.setLayout(grid)
+        
         self.l = QVBoxLayout()
         self.setLayout(self.l)
-
-        # General preferences
-        general_box = QGroupBox(_('General'), self)
-        self.l.addWidget(general_box)
-        general_box_layout = QHBoxLayout()
-        general_box.setLayout(general_box_layout)
-
-        self.general_override_cb = QCheckBox('&'+_('Force Override'), self)
-        self.general_override_cb.setToolTip(_('When checked, existing '
-                                'attributes and value will be overwritten.'))
-        general_box_layout.addWidget(self.general_override_cb)
-        self.general_override_cb.setChecked(prefs['force_override'])
 
         # Heuristic
         heuristic_box = QGroupBox(_('Heuristic'), self)
@@ -190,6 +186,21 @@ class ConfigWidget(QWidget):
         else:
             self.acc_hazard_s.setChecked(False)
 
+    def general_group(self):
+        group_box = QGroupBox('General Preferences', self)
+
+        self.force_override = QCheckBox('Force Override', self)
+        self.force_override.setToolTip('When checked, existing HTML '
+                                       'attributes and values will be '
+                                       'overwritten.')
+        self.force_override.setChecked(prefs['force_override'])
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.force_override)
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
+
+        return group_box
 
     def save_settings(self):
 
@@ -233,7 +244,7 @@ class ConfigWidget(QWidget):
             else:
                 access_hazard.append('noSoundHazard')
 
-        prefs['force_override'] = self.general_override_cb.isChecked()
+        prefs['force_override'] = self.force_override.isChecked()
         prefs['heuristic'] = {
             'title_override': self.heuristic_title_override.isChecked(),
             'type_footnotes': self.heuristic_type_footnotes.isChecked()
