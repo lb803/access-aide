@@ -1,20 +1,19 @@
 # Access Aide
-_Access Aide_ is a Calibre (book editor) plugin to enhance epubs with accessibility features.
+_Access Aide_ is a Calibre (book editor) plug-in to enhance EPUBs with accessibility features and help comply with the WCAG guidelines.
 
-# Features
+This plug-in is especially suited for people producing EPUBs through InDesign, but other users might find _Access Aide_ useful. At the time of writing, InDesign is capable of adding language information to OPF files and appropriate epub:type to HTML tags. Access Aide reads this information and adds language declarations, aria roles and metadata statements to comply with the WCAG guidelines for accessible publications.
+
+## Features
  -  Add language declaration to `<html>` tags;
- -  Map epub:type attributes to their appropriate aria role attribute.
+ -  Find tags with `epub:type` attributes and add corresponding aria roles;
  -  Add accessibility declarations to book metadata.
 
 # Installation
 
 You can either:
 
- - Install this plugin via the plug-in tool in your Calibre client `Preferences -> Advanced -> Plug-ins -> Get new plug-ins`;
+ - Install this plugin via the [plug-in manager tool](https://manual.calibre-ebook.com/customize.html#customizing-calibre-with-plugins) in your Calibre client `Preferences -> Advanced -> Plug-ins -> Get new plug-ins`;
  - Manually download a release from this repository and then load the zip file by `Preferences -> Advanced -> Plug-ins -> Load plugin from file`.
-
-# Usage
-This plugin can be used as part of an InDesign-based workflow to produce accessible epubs. InDesign is capable of adding language information to OPF files and appropriate epub:type to html tags. Access Aide reads this information and add language declarations, aria roles and metadata statements to comply with the WCAG 2.0 – AA guidelines for accessible publications.
 
 ## Config
 Plugin behaviour can be fine tuned via plugin config dialogue.
@@ -22,7 +21,7 @@ Plugin behaviour can be fine tuned via plugin config dialogue.
 ![Access Aide config dialogue](docs/config_dialogue.png)
 
 ## Use
-Open the book to enhance in the Calibre ebook editor and start Access Aide. This can be performed clicking Plugins -> Access Aide, or via Ctrl+Shift+a.
+Open the book to enhance in the [Calibre ebook editor](https://manual.calibre-ebook.com/edit.html) and start Access Aide. This can be performed clicking Plugins -> Access Aide, or via Ctrl+Shift+a.
 
 ![Access Aide confirm dialogue](docs/confirm_dialogue.png)
 
