@@ -215,14 +215,31 @@ class ConfigWidget(QWidget):
         except KeyError:
             self.a11y_box.setChecked(False)
 
-        self.force_override = QCheckBox('Force Override', self)
-        self.force_override.setToolTip('When checked, existing HTML '
-                                       'attributes and values will be '
-                                       'overwritten.')
-        self.force_override.setChecked(prefs['force_override'])
+        a11y_by_label = QLabel(self)
+        a11y_by_label.setText('Certified by:')
+
+        self.a11y_by = QLineEdit(self)
+        a11y_by_label.setBuddy(self.a11y_by)
+
+        a11y_credential_label = QLabel(self)
+        a11y_credential_label.setText('Certifier Credential:')
+
+        self.a11y_credential = QLineEdit(self)
+        a11y_credential_label.setBuddy(self.a11y_credential)
+
+        a11y_report_label = QLabel(self)
+        a11y_report_label.setText('Report URL:')
+
+        self.a11y_report = QLineEdit(self)
+        a11y_report_label.setBuddy(self.a11y_report)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(self.force_override)
+        vbox.addWidget(a11y_by_label)
+        vbox.addWidget(self.a11y_by)
+        vbox.addWidget(a11y_credential_label)
+        vbox.addWidget(self.a11y_credential)
+        vbox.addWidget(a11y_report_label)
+        vbox.addWidget(self.a11y_report)
         vbox.addStretch(1)
         self.a11y_box.setLayout(vbox)
 
