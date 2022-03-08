@@ -214,19 +214,24 @@ class ConfigWidget(QWidget):
 
         self.a11y_box.setCheckable(True)
         self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
+        self.a11y_box.setToolTip('Enable a11y metadata proprieties')
 
         a11y_by_label = QLabel('Certified by:')
         self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
+        self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
         a11y_by_label.setBuddy(self.a11y_by)
 
         a11y_credential_label = QLabel('Certifier Credential:')
         self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
                                               .get('certifierCredential', ''))
+        self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
+                                        'propriety')
         a11y_credential_label.setBuddy(self.a11y_credential)
 
         a11y_report_label = QLabel('Report URL:')
         self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
                                           .get('certifierReport', ''))
+        self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
         a11y_report_label.setBuddy(self.a11y_report)
 
         vbox = QVBoxLayout()
