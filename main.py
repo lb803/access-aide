@@ -85,9 +85,9 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
-                if prefs['heuristic']['title_override']:
+                if prefs.get('heuristic', {}).get('title_override'):
                     self.override_title(container.parsed(name))
-                if prefs['heuristic']['type_footnotes']:
+                if prefs.get('heuristic', {}).get('type_footnotes'):
                     self.add_fn_type(container.parsed(name))
 
                 self.add_lang(container.parsed(name),
@@ -237,7 +237,7 @@ class AccessAide(Tool):
         or if node is not present.
         '''
 
-        if prefs['force_override'] \
+        if prefs.get('force_override') \
            or attribute not in node.attrib:
 
             node.attrib[attribute] = value
@@ -252,7 +252,7 @@ class AccessAide(Tool):
         or if node text differs.
         '''
 
-        if prefs['force_override'] \
+        if prefs.get('force_override') \
            or ''.join(node.itertext()) != value:
 
             node.text = value
@@ -271,9 +271,9 @@ class AccessAide(Tool):
                 self.aria_stat.report(),
                 self.meta_stat.report()]
 
-        if prefs['heuristic']['title_override']:
+        if prefs.get('heuristic', {}).get('title_override'):
             data.append(self.title_stat.report())
-        if prefs['heuristic']['type_footnotes']:
+        if prefs.get('heuristic', {}).get('type_footnotes'):
             data.append(self.fn_stat.report())
 
         return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
@@ -288,7 +288,7 @@ class AccessAide(Tool):
 
         metadata = container.opf_xpath('//opf:metadata')[0]
 
-        meta = prefs['access']
+        meta = prefs.get('access')
 
         for value in meta:
 
@@ -298,7 +298,7 @@ class AccessAide(Tool):
                 if container.opf_version_parsed.major == 3:
 
                     # prevent overriding
-                    if prefs['force_override'] \
+                    if prefs.get('force_override') \
                        or not container.opf_xpath(
                            '''
                            //*[contains(@property, "{}")
@@ -317,7 +317,7 @@ class AccessAide(Tool):
                 elif container.opf_version_parsed.major == 2:
 
                     # prevent overriding
-                    if prefs['force_override'] \
+                    if prefs.get('force_override') \
                        or not container.opf_xpath(
                            '''
                            //*[contains(@name, "{}")
