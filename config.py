@@ -211,7 +211,6 @@ class ConfigWidget(QWidget):
 
     def a11y_group(self):
         self.a11y_box = QGroupBox('Conformance Properties', self)
-
         self.a11y_box.setCheckable(True)
         self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
         self.a11y_box.setToolTip('Enable a11y metadata proprieties')
@@ -219,6 +218,7 @@ class ConfigWidget(QWidget):
         a11y_by_label = QLabel('Certified by:')
         self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
         self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
+        self.a11y_by.setPlaceholderText('Book Company Ltd')
         a11y_by_label.setBuddy(self.a11y_by)
 
         a11y_credential_label = QLabel('Certifier Credential:')
@@ -226,12 +226,14 @@ class ConfigWidget(QWidget):
                                               .get('certifierCredential', ''))
         self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
                                         'propriety')
+        self.a11y_credential.setPlaceholderText('DAISY OK')
         a11y_credential_label.setBuddy(self.a11y_credential)
 
         a11y_report_label = QLabel('Report URL:')
         self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
                                           .get('certifierReport', ''))
         self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
+        self.a11y_report.setPlaceholderText('https://www.link.to/report.html')
         a11y_report_label.setBuddy(self.a11y_report)
 
         vbox = QVBoxLayout()
