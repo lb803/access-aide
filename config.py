@@ -213,39 +213,20 @@ class ConfigWidget(QWidget):
         self.a11y_box = QGroupBox('Conformance Properties', self)
 
         self.a11y_box.setCheckable(True)
-        try:
-            self.a11y_box.setChecked(prefs['a11y']['enabled'])
-        except KeyError:
-            self.a11y_box.setChecked(False)
+        self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
 
-        a11y_by_label = QLabel(self)
-        a11y_by_label.setText('Certified by:')
-
-        self.a11y_by = QLineEdit(self)
-        try:
-            self.a11y_by.setText(prefs['a11y']['certifiedBy'])
-        except KeyError:
-            self.a11y_by.setText('')
+        a11y_by_label = QLabel('Certified by:')
+        self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
         a11y_by_label.setBuddy(self.a11y_by)
 
-        a11y_credential_label = QLabel(self)
-        a11y_credential_label.setText('Certifier Credential:')
-
-        self.a11y_credential = QLineEdit(self)
-        try:
-            self.a11y_credential.setText(prefs['a11y']['certifierCredential'])
-        except KeyError:
-            self.a11y_credential.setText('')
+        a11y_credential_label = QLabel('Certifier Credential:')
+        self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
+                                              .get('certifierCredential', ''))
         a11y_credential_label.setBuddy(self.a11y_credential)
 
-        a11y_report_label = QLabel(self)
-        a11y_report_label.setText('Report URL:')
-
-        self.a11y_report = QLineEdit(self)
-        try:
-            self.a11y_report.setText(prefs['a11y']['certifierReport'])
-        except KeyError:
-            self.a11y_report.setText('')
+        a11y_report_label = QLabel('Report URL:')
+        self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
+                                          .get('certifierReport', ''))
         a11y_report_label.setBuddy(self.a11y_report)
 
         vbox = QVBoxLayout()
