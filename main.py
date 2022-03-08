@@ -97,6 +97,9 @@ class AccessAide(Tool):
             elif media_type in OPF_MIME:
                 self.add_metadata(container)
 
+                if prefs.get('a11y', {}).get('enabled'):
+                    self.add_a11y(container)
+
             else:
                 continue
 
@@ -241,7 +244,8 @@ class AccessAide(Tool):
            or attribute not in node.attrib:
 
             node.attrib[attribute] = value
-            stat.increase()
+            if stat:
+                stat.increase()
 
         return
 
@@ -256,7 +260,8 @@ class AccessAide(Tool):
            or ''.join(node.itertext()) != value:
 
             node.text = value
-            stat.increase()
+            if stat:
+                stat.increase()
 
         return
 
@@ -331,3 +336,64 @@ class AccessAide(Tool):
                         container.insert_into_xml(metadata, element)
 
                         self.meta_stat.increase()
+
+    def add_a11y(self, container):
+        ''' Add a11y metadata to OPF file.
+
+        This method looks up the config file and add appropriate metadata for
+        the volume.
+        '''
+        metadata = container.opf_xpath('//opf:metadata')[0]
+
+        certifiedBy = prefs.get('a11y', {}).get('certifiedBy')
+        if certifiedBy:
+            # if epub3
+            if container.opf_version_parsed.major == 3:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@property, "{}")]'
+                                              .format('a11y:certifiedBy')):
+
+                        element = lxml.etree.Element('meta')
+                        self.write_attrib(element, 'property',
+                                          'a11y:certifiedBy', self.meta_stat)
+                        self.write_text(element, certifiedBy, None)
+
+                        container.insert_into_xml(metadata, element)
+
+        certifierCred = prefs.get('a11y', {}).get('certifierCredential')
+        if certifierCred:
+            # if epub3
+            if container.opf_version_parsed.major == 3:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@property, "{}")]'
+                                         .format('a11y:certifierCredential')):
+
+                        element = lxml.etree.Element('meta')
+                        self.write_attrib(element, 'property',
+                                          'a11y:certifierCredential',
+                                          self.meta_stat)
+                        self.write_text(element, certifierCred, None)
+
+                        container.insert_into_xml(metadata, element)
+
+        certifierRep = prefs.get('a11y', {}).get('certifierReport')
+        if certifierCred:
+            # if epub3
+            if container.opf_version_parsed.major == 3:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@rel, "{}")]'
+                                              .format('a11y:certifierReport')):
+
+                        element = lxml.etree.Element('link')
+                        self.write_attrib(element, 'rel',
+                                          'a11y:certifierReport',
+                                          self.meta_stat)
+                        self.write_attrib(element, 'href', certifierRep, None)
+
+                        container.insert_into_xml(metadata, element)
