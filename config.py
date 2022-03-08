@@ -36,7 +36,10 @@ prefs.defaults['access'] = {
     'accessibilityHazard': ['unknown']
     }
 prefs.defaults['a11y'] = {
-    'enabled': False
+    'enabled': False,
+    'certifiedBy': '',
+    'certifierCredential': '',
+    'certifierReport': ''
 }
 
 class ConfigWidget(QWidget):
@@ -219,18 +222,30 @@ class ConfigWidget(QWidget):
         a11y_by_label.setText('Certified by:')
 
         self.a11y_by = QLineEdit(self)
+        try:
+            self.a11y_by.setText(prefs['a11y']['certifiedBy'])
+        except KeyError:
+            self.a11y_by.setText('')
         a11y_by_label.setBuddy(self.a11y_by)
 
         a11y_credential_label = QLabel(self)
         a11y_credential_label.setText('Certifier Credential:')
 
         self.a11y_credential = QLineEdit(self)
+        try:
+            self.a11y_credential.setText(prefs['a11y']['certifierCredential'])
+        except KeyError:
+            self.a11y_credential.setText('')
         a11y_credential_label.setBuddy(self.a11y_credential)
 
         a11y_report_label = QLabel(self)
         a11y_report_label.setText('Report URL:')
 
         self.a11y_report = QLineEdit(self)
+        try:
+            self.a11y_report.setText(prefs['a11y']['certifierReport'])
+        except KeyError:
+            self.a11y_report.setText('')
         a11y_report_label.setBuddy(self.a11y_report)
 
         vbox = QVBoxLayout()
@@ -300,5 +315,8 @@ class ConfigWidget(QWidget):
             'accessibilityHazard': access_hazard
             }
         prefs['a11y'] = {
-            'enabled': self.a11y_box.isChecked()
+            'enabled': self.a11y_box.isChecked(),
+            'certifiedBy': self.a11y_by.text(),
+            'certifierCredential': self.a11y_credential.text(),
+            'certifierReport': self.a11y_report.text()
             }
