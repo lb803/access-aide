@@ -35,6 +35,9 @@ prefs.defaults['access'] = {
     'accessibilityFeature': ['structuralNavigation'],
     'accessibilityHazard': ['unknown']
     }
+prefs.defaults['a11y'] = {
+    'enabled': False
+}
 
 class ConfigWidget(QWidget):
 
@@ -45,6 +48,7 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.general_group(), 0, 0, 1, 1)
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
+        grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
         self.setLayout(grid)
         
     def general_group(self):
@@ -202,6 +206,28 @@ class ConfigWidget(QWidget):
 
         return group_box
 
+    def a11y_group(self):
+        self.a11y_box = QGroupBox('Conformance Properties', self)
+
+        self.a11y_box.setCheckable(True)
+        try:
+            self.a11y_box.setChecked(prefs['a11y']['enabled'])
+        except KeyError:
+            self.a11y_box.setChecked(False)
+
+        self.force_override = QCheckBox('Force Override', self)
+        self.force_override.setToolTip('When checked, existing HTML '
+                                       'attributes and values will be '
+                                       'overwritten.')
+        self.force_override.setChecked(prefs['force_override'])
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.force_override)
+        vbox.addStretch(1)
+        self.a11y_box.setLayout(vbox)
+
+        return self.a11y_box
+
     def save_settings(self):
 
         # accessMode
@@ -255,4 +281,7 @@ class ConfigWidget(QWidget):
             'accessModeSufficient': [access_mode_suff],
             'accessibilityFeature': [self.acc_feat.text()],
             'accessibilityHazard': access_hazard
+            }
+        prefs['a11y'] = {
+            'enabled': self.a11y_box.isChecked()
             }
