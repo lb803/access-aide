@@ -35,6 +35,12 @@ prefs.defaults['access'] = {
     'accessibilityFeature': ['structuralNavigation'],
     'accessibilityHazard': ['unknown']
     }
+prefs.defaults['a11y'] = {
+    'enabled': False,
+    'certifiedBy': '',
+    'certifierCredential': '',
+    'certifierReport': ''
+}
 
 class ConfigWidget(QWidget):
 
@@ -45,6 +51,7 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.general_group(), 0, 0, 1, 1)
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
+        grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
         self.setLayout(grid)
         
     def general_group(self):
@@ -202,6 +209,45 @@ class ConfigWidget(QWidget):
 
         return group_box
 
+    def a11y_group(self):
+        self.a11y_box = QGroupBox('Conformance Properties', self)
+        self.a11y_box.setCheckable(True)
+        self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
+        self.a11y_box.setToolTip('Enable a11y metadata proprieties')
+
+        a11y_by_label = QLabel('Certified by:')
+        self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
+        self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
+        self.a11y_by.setPlaceholderText('Book Company Ltd')
+        a11y_by_label.setBuddy(self.a11y_by)
+
+        a11y_credential_label = QLabel('Certifier Credential:')
+        self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
+                                              .get('certifierCredential', ''))
+        self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
+                                        'propriety')
+        self.a11y_credential.setPlaceholderText('DAISY OK')
+        a11y_credential_label.setBuddy(self.a11y_credential)
+
+        a11y_report_label = QLabel('Report URL:')
+        self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
+                                          .get('certifierReport', ''))
+        self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
+        self.a11y_report.setPlaceholderText('https://www.link.to/report.html')
+        a11y_report_label.setBuddy(self.a11y_report)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(a11y_by_label)
+        vbox.addWidget(self.a11y_by)
+        vbox.addWidget(a11y_credential_label)
+        vbox.addWidget(self.a11y_credential)
+        vbox.addWidget(a11y_report_label)
+        vbox.addWidget(self.a11y_report)
+        vbox.addStretch(1)
+        self.a11y_box.setLayout(vbox)
+
+        return self.a11y_box
+
     def save_settings(self):
 
         # accessMode
@@ -255,4 +301,10 @@ class ConfigWidget(QWidget):
             'accessModeSufficient': [access_mode_suff],
             'accessibilityFeature': [self.acc_feat.text()],
             'accessibilityHazard': access_hazard
+            }
+        prefs['a11y'] = {
+            'enabled': self.a11y_box.isChecked(),
+            'certifiedBy': self.a11y_by.text(),
+            'certifierCredential': self.a11y_credential.text(),
+            'certifierReport': self.a11y_report.text()
             }
