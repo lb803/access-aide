@@ -17,8 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon
 from calibre.utils.config import JSONConfig
+
+import webbrowser
+from os.path import abspath
 
 prefs = JSONConfig('plugins/access_aide')
 
@@ -52,6 +55,7 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
         grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
+        grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
         self.setLayout(grid)
         
     def general_group(self):
@@ -247,6 +251,28 @@ class ConfigWidget(QWidget):
         self.a11y_box.setLayout(vbox)
 
         return self.a11y_box
+
+    def buttons_group(self):
+        github_button = QPushButton('Source code')
+        github_button.clicked.connect(self.github)
+        github_button.setIcon(QIcon(abspath('icon/GitHub-Mark-32px.png')))
+
+        forum_button = QPushButton('⌨ Calibre Forum')
+        forum_button.clicked.connect(self.forum)
+        
+        hbox = QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(github_button)
+        hbox.addWidget(forum_button)
+        hbox.addStretch(1)
+
+        return hbox
+
+    def github(self):
+        webbrowser.open('https://github.com/lb803/access-aide')
+
+    def forum(self):
+        webbrowser.open('https://www.mobileread.com/forums/showthread.php?t=337132')
 
     def save_settings(self):
 

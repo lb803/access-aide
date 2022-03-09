@@ -36,3 +36,5 @@ GPL v3.0
 This project aims to port the functionalities of the excellent [Access-Aide](https://github.com/kevinhendricks/Access-Aide) LGPL v2.1 Sigil plugin to Calibre.
 
 The plugin icon (`./icon/icon.png`) comes from the `adwaita-icon-theme` pack ([gitlab page](https://gitlab.gnome.org/GNOME/adwaita-icon-theme) of the project), released as LGPL v3 by the GNOME Project.
+
+The GitHub icon (`./icon/GitHub-Mark-32px.png`) was downloaded from the [dedicated web page](https://github.com/logos) and it is used as the icon of the button which links to this GitHub repository.
