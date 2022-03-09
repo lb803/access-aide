@@ -6,7 +6,9 @@ This plug-in is especially suited for people producing EPUBs through InDesign, b
 ## Features
  -  Add language declaration to `<html>` tags;
  -  Find tags with `epub:type` attributes and add corresponding aria roles;
- -  Add accessibility declarations to book metadata.
+ -  Add accessibility declarations to book metadata:
+    + schema:accessMode, schema:accessibilityFeature, schema:accessibilityHazard, schema:accessibilitySummary, schema:accessModeSufficient;
+    + a11y:certifiedBy, a11y:certifierCredential, a11y:certifierReport.
 
 # Installation
 
