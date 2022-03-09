@@ -17,8 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon
 from calibre.utils.config import JSONConfig
+
+import webbrowser
+from os.path import abspath
 
 prefs = JSONConfig('plugins/access_aide')
 
@@ -35,159 +38,241 @@ prefs.defaults['access'] = {
     'accessibilityFeature': ['structuralNavigation'],
     'accessibilityHazard': ['unknown']
     }
+prefs.defaults['a11y'] = {
+    'enabled': False,
+    'certifiedBy': '',
+    'certifierCredential': '',
+    'certifierReport': ''
+}
 
 class ConfigWidget(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
-        self.l = QVBoxLayout()
-        self.setLayout(self.l)
 
-        # General preferences
-        general_box = QGroupBox(_('General'), self)
-        self.l.addWidget(general_box)
-        general_box_layout = QHBoxLayout()
-        general_box.setLayout(general_box_layout)
+        grid = QGridLayout()
+        grid.addWidget(self.general_group(), 0, 0, 1, 1)
+        grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
+        grid.addWidget(self.access_group(), 1, 0, 1, 2)
+        grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
+        grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
+        self.setLayout(grid)
+        
+    def general_group(self):
+        group_box = QGroupBox('General Preferences', self)
 
-        self.general_override_cb = QCheckBox('&'+_('Force Override'), self)
-        self.general_override_cb.setToolTip(_('When checked, existing '
-                                'attributes and value will be overwritten.'))
-        general_box_layout.addWidget(self.general_override_cb)
-        self.general_override_cb.setChecked(prefs['force_override'])
+        self.force_override = QCheckBox('Force Override', self)
+        self.force_override.setToolTip('When checked, existing HTML '
+                                       'attributes and values will be '
+                                       'overwritten.')
+        self.force_override.setChecked(prefs['force_override'])
 
-        # Heuristic
-        heuristic_box = QGroupBox(_('Heuristic'), self)
-        self.l.addWidget(heuristic_box)
-        heuristic_box_layout = QVBoxLayout()
-        heuristic_box.setLayout(heuristic_box_layout)
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.force_override)
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
 
-        self.heuristic_title_override = QCheckBox('&'+_('Match <title> text '
-                                                        'with <h1>'), self)
-        self.heuristic_title_override.setToolTip(_('When checked, replaces '
-                                          'the existing <title> text with'
-                                          'the first <h1> found on the page'))
-        heuristic_box_layout.addWidget(self.heuristic_title_override)
+        return group_box
+
+    def heuristic_group(self):
+        group_box = QGroupBox('Heuristic Options', self)
+
+        self.title_override = QCheckBox('Match <title> text with <h1>', self)
+        self.title_override.setToolTip('When checked, replaces '
+                                       'the existing <title> text with'
+                                       'the first <h1> found on the page')
         try:
-            self.heuristic_title_override \
+            self.title_override \
                 .setChecked(prefs['heuristic']['title_override'])
         except KeyError:
-            self.heuristic_title_override.setChecked(False)
+            self.title_override.setChecked(False)
 
-
-        self.heuristic_type_footnotes = QCheckBox('&'+_('Add epub:type to '
-                                                        'footnote marks'), self)
-        self.heuristic_type_footnotes.setToolTip(_('When checked, adds '
-                                                   'corresponding epub:type '
-                                                   'to footnote marks.'))
-        heuristic_box_layout.addWidget(self.heuristic_type_footnotes)
+        self.type_fn = QCheckBox('Add epub:type to footnote and endnote '
+                                 'marks', self)
+        self.type_fn.setToolTip('When checked, adds corresponding epub:type '
+                                'to footnote and endnote marks.')
         try:
-            self.heuristic_type_footnotes \
-                .setChecked(prefs['heuristic']['type_footnotes'])
+            self.type_fn.setChecked(prefs['heuristic']['type_footnotes'])
         except KeyError:
-            self.heuristic_type_footnotes.setChecked(False)
-        
+            self.type_fn.setChecked(False)
 
-        # Accessibility options
-        access = QGroupBox(_('Accessibility'), self)
-        self.l.addWidget(access)
-        access_layout = QVBoxLayout()
-        access.setLayout(access_layout)
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.title_override)
+        vbox.addWidget(self.type_fn)
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
+
+        return group_box
+
+    def access_group(self):
+        group_box = QGroupBox('Accessibility', self)
 
         # accessibilitySummary
-        self.label = QLabel('Accessibility Summary:')
-        access_layout.addWidget(self.label)
+        acc_summ_label = QLabel(self)
+        acc_summ_label.setText('Accessibility Summary:')
 
         self.acc_summ = QLineEdit(self)
         self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
-        access_layout.addWidget(self.acc_summ)
-        self.label.setBuddy(self.acc_summ)
+        acc_summ_label.setBuddy(self.acc_summ)
 
         # accessMode
-        self.label2 = QLabel('Access Mode:')
-        access_layout.addWidget(self.label2)
-
-        self.acc_mode_t = QCheckBox('&'+_('Textual'), self)
-        access_layout.addWidget(self.acc_mode_t)
+        acc_mode_label = QLabel(self)
+        acc_mode_label.setText('Access Mode:')
+        
+        self.acc_mode_t = QCheckBox('Textual', self)
         if 'textual' in prefs['access']['accessMode']:
             self.acc_mode_t.setChecked(True)
         else:
             self.acc_mode_t.setChecked(False)
 
-        self.acc_mode_v = QCheckBox('&'+_('Visual'), self)
-        access_layout.addWidget(self.acc_mode_v)
-
+        self.acc_mode_v = QCheckBox('Visual', self)
         if 'visual' in prefs['access']['accessMode']:
             self.acc_mode_v.setChecked(True)
-
         else:
             self.acc_mode_v.setChecked(False)
 
         # accessModeSufficient
-        self.label3 = QLabel('Access Mode Sufficient:')
-        access_layout.addWidget(self.label3)
+        acc_suff_label = QLabel(self)
+        acc_suff_label.setText('Access Mode Sufficient:')
 
         self.acc_suff_t = QRadioButton('Textual')
-
         if 'textual' in prefs['access']['accessModeSufficient']:
             self.acc_suff_t.setChecked(True)
 
-        access_layout.addWidget(self.acc_suff_t)
-
         self.acc_suff_v = QRadioButton('Visual')
-
         if 'visual' in prefs['access']['accessModeSufficient']:
             self.acc_suff_v.setChecked(True)
 
-        access_layout.addWidget(self.acc_suff_v)
-
         # accessibilityFeature
-        self.label4 = QLabel('Accessibility Feature:')
-        access_layout.addWidget(self.label4)
+        acc_feat_label = QLabel(self)
+        acc_feat_label.setText('Accessibility Feature:')
 
         self.acc_feat = QLineEdit(self)
         self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
-        access_layout.addWidget(self.acc_feat)
-        self.label.setBuddy(self.acc_feat)
+        acc_feat_label.setBuddy(self.acc_feat)
 
         # accessibilityHazard
-        self.label5 = QLabel('Accessibility Hazard:')
-        access_layout.addWidget(self.label5)
+        acc_hazard_label = QLabel(self)
+        acc_hazard_label.setText('Accessibility Hazard:')
 
-        self.acc_hazard_none = QCheckBox('&'+_('None'), self)
-        access_layout.addWidget(self.acc_hazard_none)
+        self.acc_hazard_none = QCheckBox('None', self)
         if 'none' in prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_none.setChecked(True)
         else:
             self.acc_hazard_none.setChecked(False)
 
-        self.acc_hazard_unknown = QCheckBox('&'+_('Unknown'), self)
-        access_layout.addWidget(self.acc_hazard_unknown)
+        self.acc_hazard_unknown = QCheckBox('Unknown', self)
         if 'unknown' in prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_unknown.setChecked(True)
         else:
             self.acc_hazard_unknown.setChecked(False)
 
-        self.acc_hazard_f = QCheckBox('&'+_('Flashing'), self)
-        access_layout.addWidget(self.acc_hazard_f)
+        self.acc_hazard_f = QCheckBox('Flashing', self)
         if 'flashing' in prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_f.setChecked(True)
         else:
             self.acc_hazard_f.setChecked(False)
 
-        self.acc_hazard_m = QCheckBox('&'+_('Motion Simulation'), self)
-        access_layout.addWidget(self.acc_hazard_m)
-        if 'motionSimulation' in prefs['access'].get('accessibilityHazard', []):
+        self.acc_hazard_m = QCheckBox('Motion Simulation', self)
+        if 'motionSimulation' in prefs['access'] \
+                                 .get('accessibilityHazard', []):
             self.acc_hazard_m.setChecked(True)
         else:
             self.acc_hazard_m.setChecked(False)
 
-        self.acc_hazard_s = QCheckBox('&'+_('Sound'), self)
-        access_layout.addWidget(self.acc_hazard_s)
+        self.acc_hazard_s = QCheckBox('Sound', self)
         if 'sound' in prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_s.setChecked(True)
         else:
             self.acc_hazard_s.setChecked(False)
 
+        vbox = QVBoxLayout()
+        vbox.addWidget(acc_summ_label)
+        vbox.addWidget(self.acc_summ)
+
+        vbox.addWidget(acc_mode_label)
+        vbox.addWidget(self.acc_mode_t)
+        vbox.addWidget(self.acc_mode_v)
+
+        vbox.addWidget(acc_suff_label)
+        vbox.addWidget(self.acc_suff_t)
+        vbox.addWidget(self.acc_suff_v)
+
+        vbox.addWidget(acc_feat_label)
+        vbox.addWidget(self.acc_feat)
+
+        vbox.addWidget(acc_hazard_label)
+        vbox.addWidget(self.acc_hazard_none)
+        vbox.addWidget(self.acc_hazard_unknown)
+        vbox.addWidget(self.acc_hazard_f)
+        vbox.addWidget(self.acc_hazard_m)
+        vbox.addWidget(self.acc_hazard_s)
+        
+        vbox.addStretch(1)
+        group_box.setLayout(vbox)
+
+        return group_box
+
+    def a11y_group(self):
+        self.a11y_box = QGroupBox('Conformance Properties', self)
+        self.a11y_box.setCheckable(True)
+        self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
+        self.a11y_box.setToolTip('Enable a11y metadata proprieties')
+
+        a11y_by_label = QLabel('Certified by:')
+        self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
+        self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
+        self.a11y_by.setPlaceholderText('Book Company Ltd')
+        a11y_by_label.setBuddy(self.a11y_by)
+
+        a11y_credential_label = QLabel('Certifier Credential:')
+        self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
+                                              .get('certifierCredential', ''))
+        self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
+                                        'propriety')
+        self.a11y_credential.setPlaceholderText('DAISY OK')
+        a11y_credential_label.setBuddy(self.a11y_credential)
+
+        a11y_report_label = QLabel('Report URL:')
+        self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
+                                          .get('certifierReport', ''))
+        self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
+        self.a11y_report.setPlaceholderText('https://www.link.to/report.html')
+        a11y_report_label.setBuddy(self.a11y_report)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(a11y_by_label)
+        vbox.addWidget(self.a11y_by)
+        vbox.addWidget(a11y_credential_label)
+        vbox.addWidget(self.a11y_credential)
+        vbox.addWidget(a11y_report_label)
+        vbox.addWidget(self.a11y_report)
+        vbox.addStretch(1)
+        self.a11y_box.setLayout(vbox)
+
+        return self.a11y_box
+
+    def buttons_group(self):
+        github_button = QPushButton('Source code')
+        github_button.clicked.connect(self.github)
+        github_button.setIcon(QIcon(abspath('icon/GitHub-Mark-32px.png')))
+
+        forum_button = QPushButton('⌨ Calibre Forum')
+        forum_button.clicked.connect(self.forum)
+        
+        hbox = QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(github_button)
+        hbox.addWidget(forum_button)
+        hbox.addStretch(1)
+
+        return hbox
+
+    def github(self):
+        webbrowser.open('https://github.com/lb803/access-aide')
+
+    def forum(self):
+        webbrowser.open('https://www.mobileread.com/forums/showthread.php?t=337132')
 
     def save_settings(self):
 
@@ -231,10 +316,10 @@ class ConfigWidget(QWidget):
             else:
                 access_hazard.append('noSoundHazard')
 
-        prefs['force_override'] = self.general_override_cb.isChecked()
+        prefs['force_override'] = self.force_override.isChecked()
         prefs['heuristic'] = {
-            'title_override': self.heuristic_title_override.isChecked(),
-            'type_footnotes': self.heuristic_type_footnotes.isChecked()
+            'title_override': self.title_override.isChecked(),
+            'type_footnotes': self.type_fn.isChecked()
             }
         prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
@@ -242,4 +327,10 @@ class ConfigWidget(QWidget):
             'accessModeSufficient': [access_mode_suff],
             'accessibilityFeature': [self.acc_feat.text()],
             'accessibilityHazard': access_hazard
+            }
+        prefs['a11y'] = {
+            'enabled': self.a11y_box.isChecked(),
+            'certifiedBy': self.a11y_by.text(),
+            'certifierCredential': self.a11y_credential.text(),
+            'certifierReport': self.a11y_report.text()
             }
