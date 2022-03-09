@@ -17,11 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap
 from calibre.utils.config import JSONConfig
 
 import webbrowser
-from os.path import abspath
 
 prefs = JSONConfig('plugins/access_aide')
 
@@ -255,7 +254,9 @@ class ConfigWidget(QWidget):
     def buttons_group(self):
         github_button = QPushButton('Source code')
         github_button.clicked.connect(self.github)
-        github_button.setIcon(QIcon(abspath('icon/GitHub-Mark-32px.png')))
+        github_logo = QPixmap()
+        github_logo.loadFromData(get_resources('icon/GitHub-Mark-32px.png'))
+        github_button.setIcon(QIcon(github_logo))
 
         forum_button = QPushButton('⌨ Calibre Forum')
         forum_button.clicked.connect(self.forum)
