@@ -361,6 +361,21 @@ class AccessAide(Tool):
                         self.write_text(element, certifiedBy, None)
 
                         container.insert_into_xml(metadata, element)
+            # if epub2
+            elif container.opf_version_parsed.major == 2:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@name, "{}")]'
+                                              .format('a11y:certifiedBy')):
+
+                    element = lxml.etree.Element('meta')
+                    self.write_attrib(element, 'name',
+                                      'a11y:certifiedBy', self.meta_stat)
+                    self.write_attrib(element, 'content',
+                                      certifiedBy, None)
+
+                    container.insert_into_xml(metadata, element)
 
         certifierCred = prefs.get('a11y', {}).get('certifierCredential')
         if certifierCred:
@@ -380,8 +395,24 @@ class AccessAide(Tool):
 
                         container.insert_into_xml(metadata, element)
 
+            # if epub2
+            elif container.opf_version_parsed.major == 2:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@name, "{}")]'
+                                        .format('a11y:certifierCredential')):
+
+                    element = lxml.etree.Element('meta')
+                    self.write_attrib(element, 'name',
+                                      'a11y:certifierCredential',
+                                      self.meta_stat)
+                    self.write_attrib(element, 'content', certifierCred, None)
+
+                    container.insert_into_xml(metadata, element)
+
         certifierRep = prefs.get('a11y', {}).get('certifierReport')
-        if certifierCred:
+        if certifierRep:
             # if epub3
             if container.opf_version_parsed.major == 3:
 
@@ -397,3 +428,18 @@ class AccessAide(Tool):
                         self.write_attrib(element, 'href', certifierRep, None)
 
                         container.insert_into_xml(metadata, element)
+
+            # if epub2
+            elif container.opf_version_parsed.major == 2:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@name, "{}")]'
+                                        .format('a11y:certifierReport')):
+
+                    element = lxml.etree.Element('meta')
+                    self.write_attrib(element, 'name', 'a11y:certifierReport',
+                                      self.meta_stat)
+                    self.write_attrib(element, 'content', certifierRep, None)
+
+                    container.insert_into_xml(metadata, element)
