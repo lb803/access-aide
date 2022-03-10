@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap
 from calibre.utils.config import JSONConfig
 
 import webbrowser
@@ -107,17 +107,10 @@ class ConfigWidget(QWidget):
         group_box = QGroupBox('Accessibility', self)
 
         # accessibilitySummary
-        acc_summ_label = QLabel(self)
-        acc_summ_label.setText('Accessibility Summary:')
-
         self.acc_summ = QLineEdit(self)
         self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
-        acc_summ_label.setBuddy(self.acc_summ)
 
         # accessMode
-        acc_mode_label = QLabel(self)
-        acc_mode_label.setText('Access Mode:')
-        
         self.acc_mode_t = QCheckBox('Textual', self)
         if 'textual' in prefs['access']['accessMode']:
             self.acc_mode_t.setChecked(True)
@@ -130,10 +123,11 @@ class ConfigWidget(QWidget):
         else:
             self.acc_mode_v.setChecked(False)
 
-        # accessModeSufficient
-        acc_suff_label = QLabel(self)
-        acc_suff_label.setText('Access Mode Sufficient:')
+        acc_mode_box = QVBoxLayout()
+        acc_mode_box.addWidget(self.acc_mode_t)
+        acc_mode_box.addWidget(self.acc_mode_v)
 
+        # accessModeSufficient
         self.acc_suff_t = QRadioButton('Textual')
         if 'textual' in prefs['access']['accessModeSufficient']:
             self.acc_suff_t.setChecked(True)
@@ -142,18 +136,15 @@ class ConfigWidget(QWidget):
         if 'visual' in prefs['access']['accessModeSufficient']:
             self.acc_suff_v.setChecked(True)
 
-        # accessibilityFeature
-        acc_feat_label = QLabel(self)
-        acc_feat_label.setText('Accessibility Feature:')
+        acc_suff_box = QVBoxLayout()
+        acc_suff_box.addWidget(self.acc_suff_t)
+        acc_suff_box.addWidget(self.acc_suff_v)
 
+        # accessibilityFeature
         self.acc_feat = QLineEdit(self)
         self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
-        acc_feat_label.setBuddy(self.acc_feat)
 
         # accessibilityHazard
-        acc_hazard_label = QLabel(self)
-        acc_hazard_label.setText('Accessibility Hazard:')
-
         self.acc_hazard_none = QCheckBox('None', self)
         if 'none' in prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_none.setChecked(True)
@@ -185,30 +176,21 @@ class ConfigWidget(QWidget):
         else:
             self.acc_hazard_s.setChecked(False)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(acc_summ_label)
-        vbox.addWidget(self.acc_summ)
+        acc_hazard_box = QVBoxLayout()
+        acc_hazard_box.addWidget(self.acc_hazard_none)
+        acc_hazard_box.addWidget(self.acc_hazard_unknown)
+        acc_hazard_box.addWidget(self.acc_hazard_f)
+        acc_hazard_box.addWidget(self.acc_hazard_m)
+        acc_hazard_box.addWidget(self.acc_hazard_s)
 
-        vbox.addWidget(acc_mode_label)
-        vbox.addWidget(self.acc_mode_t)
-        vbox.addWidget(self.acc_mode_v)
-
-        vbox.addWidget(acc_suff_label)
-        vbox.addWidget(self.acc_suff_t)
-        vbox.addWidget(self.acc_suff_v)
-
-        vbox.addWidget(acc_feat_label)
-        vbox.addWidget(self.acc_feat)
-
-        vbox.addWidget(acc_hazard_label)
-        vbox.addWidget(self.acc_hazard_none)
-        vbox.addWidget(self.acc_hazard_unknown)
-        vbox.addWidget(self.acc_hazard_f)
-        vbox.addWidget(self.acc_hazard_m)
-        vbox.addWidget(self.acc_hazard_s)
-        
-        vbox.addStretch(1)
-        group_box.setLayout(vbox)
+        fbox = QFormLayout()
+        fbox.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        fbox.addRow(QLabel('Accessibility Summary:'), self.acc_summ)
+        fbox.addRow(QLabel('Access Mode:'), acc_mode_box)
+        fbox.addRow(QLabel('Access Mode Sufficient:'), acc_suff_box)
+        fbox.addRow(QLabel('Accessibility Feature:'), self.acc_feat)
+        fbox.addRow(QLabel('Accessibility Hazard:'), acc_hazard_box)
+        group_box.setLayout(fbox)
 
         return group_box
 
@@ -218,36 +200,27 @@ class ConfigWidget(QWidget):
         self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
         self.a11y_box.setToolTip('Enable a11y metadata proprieties')
 
-        a11y_by_label = QLabel('Certified by:')
         self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
         self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
         self.a11y_by.setPlaceholderText('Book Company Ltd')
-        a11y_by_label.setBuddy(self.a11y_by)
 
-        a11y_credential_label = QLabel('Certifier Credential:')
         self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
                                               .get('certifierCredential', ''))
         self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
                                         'propriety')
         self.a11y_credential.setPlaceholderText('DAISY OK')
-        a11y_credential_label.setBuddy(self.a11y_credential)
 
-        a11y_report_label = QLabel('Report URL:')
         self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
                                           .get('certifierReport', ''))
         self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
         self.a11y_report.setPlaceholderText('https://www.link.to/report.html')
-        a11y_report_label.setBuddy(self.a11y_report)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(a11y_by_label)
-        vbox.addWidget(self.a11y_by)
-        vbox.addWidget(a11y_credential_label)
-        vbox.addWidget(self.a11y_credential)
-        vbox.addWidget(a11y_report_label)
-        vbox.addWidget(self.a11y_report)
-        vbox.addStretch(1)
-        self.a11y_box.setLayout(vbox)
+        fbox = QFormLayout()
+        fbox.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        fbox.addRow(QLabel('Certified by:'), self.a11y_by)
+        fbox.addRow(QLabel('Certifier Credential:'), self.a11y_credential)
+        fbox.addRow(QLabel('Report URL:'), self.a11y_report)
+        self.a11y_box.setLayout(fbox)
 
         return self.a11y_box
 
