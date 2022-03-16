@@ -345,6 +345,38 @@ class AccessAide(Tool):
         '''
         metadata = container.opf_xpath('//opf:metadata')[0]
 
+        conforms_to = prefs.get('dcterms', {}).get('conformsTo')
+        if conforms_to:
+            # if epub3
+            if container.opf_version_parsed.major == 3:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@rel, "{}")]'
+                                              .format('dcterms:conformsTo')):
+
+                        element = lxml.etree.Element('link')
+                        self.write_attrib(element, 'rel',
+                                          'dcterms:conformsTo', self.meta_stat)
+                        self.write_attrib(element, 'href', conforms_to, None)
+
+                        container.insert_into_xml(metadata, element)
+
+            # if epub2
+            elif container.opf_version_parsed.major == 2:
+
+                # prevent overriding
+                if prefs.get('force_override') \
+                   or not container.opf_xpath('//*[contains(@name, "{}")]'
+                                              .format('dcterms:conformsTo')):
+
+                    element = lxml.etree.Element('meta')
+                    self.write_attrib(element, 'name',
+                                      'dcterms:conformsTo', self.meta_stat)
+                    self.write_attrib(element, 'content', conforms_to, None)
+
+                    container.insert_into_xml(metadata, element)
+
         certifiedBy = prefs.get('a11y', {}).get('certifiedBy')
         if certifiedBy:
             # if epub3
