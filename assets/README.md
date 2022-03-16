@@ -33,3 +33,6 @@ Exception has been made for `a` and `img` which are considered special cases as:
  -  `img` (accepted only with alt text)
 
 These exceptions are hardcoded in the add_aria() method.
+
+# `acc_feature_values.json` file
+This is a list of features which are helpful for accessibility. These can be added as metadata under _accessibilityFeature_.
