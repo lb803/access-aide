@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter
+from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
 import webbrowser
+import json
 
 prefs = JSONConfig('plugins/access_aide')
 
@@ -151,6 +153,12 @@ class ConfigWidget(QWidget):
                                  'propriety. Separate values with space.')
         self.acc_feat.setPlaceholderText('structuralNavigation '
                                          'alternativeText')
+
+        feat_list = json.loads(get_resources('assets/acc_feature_values.json'))
+        completer = QCompleter(feat_list)
+        completer.setFilterMode(Qt.MatchContains)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.acc_feat.setCompleter(completer)
 
         # accessibilityHazard
         self.acc_hazard_none = QCheckBox('None', self)
