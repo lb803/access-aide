@@ -56,7 +56,7 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.general_group(), 0, 0, 1, 1)
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
-        grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
+        grid.addWidget(self.conform_group(), 2, 0, 1, 2)
         grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
         self.setLayout(grid)
         
@@ -197,11 +197,11 @@ class ConfigWidget(QWidget):
 
         return group_box
 
-    def a11y_group(self):
-        self.a11y_box = QGroupBox('Conformance Properties', self)
-        self.a11y_box.setCheckable(True)
-        self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
-        self.a11y_box.setToolTip('Enable a11y metadata proprieties')
+    def conform_group(self):
+        self.conform_box = QGroupBox('Conformance Properties', self)
+        self.conform_box.setCheckable(True)
+        self.conform_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
+        self.conform_box.setToolTip('Enable conformance metadata proprieties')
 
         self.conform_to = QLineEdit(prefs.get('dcterms', {}) \
                                     .get('conformsTo', ''))
@@ -231,9 +231,9 @@ class ConfigWidget(QWidget):
         fbox.addRow(QLabel('Certified by:'), self.a11y_by)
         fbox.addRow(QLabel('Certifier Credential:'), self.a11y_credential)
         fbox.addRow(QLabel('Report URL:'), self.a11y_report)
-        self.a11y_box.setLayout(fbox)
+        self.conform_box.setLayout(fbox)
 
-        return self.a11y_box
+        return self.conform_box
 
     def buttons_group(self):
         github_button = QPushButton('Source code')
@@ -314,7 +314,7 @@ class ConfigWidget(QWidget):
             'accessibilityHazard': access_hazard
             }
         prefs['a11y'] = {
-            'enabled': self.a11y_box.isChecked(),
+            'enabled': self.conform_box.isChecked(),
             'certifiedBy': self.a11y_by.text(),
             'certifierCredential': self.a11y_credential.text(),
             'certifierReport': self.a11y_report.text()
