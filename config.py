@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter
+from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
 import webbrowser
+import json
 
 prefs = JSONConfig('plugins/access_aide')
 
@@ -34,7 +36,7 @@ prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
     'accessModeSufficient': ['textual'],
-    'accessibilityFeature': ['structuralNavigation'],
+    'accessibilityFeature': ['structuralNavigation', 'alternativeText'],
     'accessibilityHazard': ['unknown']
     }
 prefs.defaults['a11y'] = {
@@ -43,6 +45,36 @@ prefs.defaults['a11y'] = {
     'certifierCredential': '',
     'certifierReport': ''
 }
+prefs.defaults['dcterms'] = {
+    'conformsTo': ''
+}
+
+
+class Completer(QCompleter):
+
+    def __init__(self, *args, **kwargs):
+        super(Completer, self).__init__(*args, **kwargs)
+        self.setFilterMode(Qt.MatchContains)
+        self.setCaseSensitivity(Qt.CaseInsensitive)
+        self.setCompletionMode(QCompleter.PopupCompletion)
+
+
+    # Add texts instead of replace
+    def pathFromIndex(self, index):
+        path = QCompleter.pathFromIndex(self, index)
+
+        lst = str(self.widget().text()).split(' ')
+
+        if len(lst) > 1:
+            path = '%s %s' % (' '.join(lst[:-1]), path)
+
+        return path
+
+    # Add operator to separate between texts
+    def splitPath(self, path):
+        path = str(path.split(' ')[-1]).lstrip(' ')
+        return [path]
+
 
 class ConfigWidget(QWidget):
 
@@ -53,10 +85,10 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.general_group(), 0, 0, 1, 1)
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
-        grid.addWidget(self.a11y_group(), 2, 0, 1, 2)
+        grid.addWidget(self.conform_group(), 2, 0, 1, 2)
         grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
         self.setLayout(grid)
-        
+
     def general_group(self):
         group_box = QGroupBox('General Preferences', self)
 
@@ -142,7 +174,16 @@ class ConfigWidget(QWidget):
 
         # accessibilityFeature
         self.acc_feat = QLineEdit(self)
-        self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
+        acc_feat_list = prefs.get('access', {}).get('accessibilityFeature', [])
+        self.acc_feat.setText(' '.join(acc_feat_list))
+        self.acc_feat.setToolTip('schema:accessibilityFeature metadata '
+                                 'propriety. Separate values with space.')
+        self.acc_feat.setPlaceholderText('structuralNavigation '
+                                         'alternativeText')
+
+        feat_list = json.loads(get_resources('assets/acc_feature_values.json'))
+        completer = Completer(feat_list)
+        self.acc_feat.setCompleter(completer)
 
         # accessibilityHazard
         self.acc_hazard_none = QCheckBox('None', self)
@@ -194,11 +235,18 @@ class ConfigWidget(QWidget):
 
         return group_box
 
-    def a11y_group(self):
-        self.a11y_box = QGroupBox('Conformance Properties', self)
-        self.a11y_box.setCheckable(True)
-        self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
-        self.a11y_box.setToolTip('Enable a11y metadata proprieties')
+    def conform_group(self):
+        self.conform_box = QGroupBox('Conformance Properties', self)
+        self.conform_box.setCheckable(True)
+        self.conform_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
+        self.conform_box.setToolTip('Enable conformance metadata proprieties')
+
+        self.conform_to = QLineEdit(prefs.get('dcterms', {}) \
+                                    .get('conformsTo', ''))
+        self.conform_to.setToolTip('dcterms:conformsTo metadata propriety')
+        self.conform_to.setPlaceholderText('http://www.idpf.org/epub/a11y/'
+                                           'accessibility-20170105.html'
+                                           '#wcag-aa')
 
         self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
         self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
@@ -217,12 +265,13 @@ class ConfigWidget(QWidget):
 
         fbox = QFormLayout()
         fbox.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        fbox.addRow(QLabel('Conformance URL:'), self.conform_to)
         fbox.addRow(QLabel('Certified by:'), self.a11y_by)
         fbox.addRow(QLabel('Certifier Credential:'), self.a11y_credential)
         fbox.addRow(QLabel('Report URL:'), self.a11y_report)
-        self.a11y_box.setLayout(fbox)
+        self.conform_box.setLayout(fbox)
 
-        return self.a11y_box
+        return self.conform_box
 
     def buttons_group(self):
         github_button = QPushButton('Source code')
@@ -233,7 +282,7 @@ class ConfigWidget(QWidget):
 
         forum_button = QPushButton('⌨ Calibre Forum')
         forum_button.clicked.connect(self.forum)
-        
+
         hbox = QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(github_button)
@@ -299,12 +348,15 @@ class ConfigWidget(QWidget):
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
             'accessModeSufficient': [access_mode_suff],
-            'accessibilityFeature': [self.acc_feat.text()],
+            'accessibilityFeature': self.acc_feat.text().split(),
             'accessibilityHazard': access_hazard
             }
         prefs['a11y'] = {
-            'enabled': self.a11y_box.isChecked(),
+            'enabled': self.conform_box.isChecked(),
             'certifiedBy': self.a11y_by.text(),
             'certifierCredential': self.a11y_credential.text(),
             'certifierReport': self.a11y_report.text()
             }
+        prefs['dcterms'] = {
+            'conformsTo': self.conform_to.text()
+        }
