@@ -34,7 +34,7 @@ prefs.defaults['access'] = {
     'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
     'accessMode': ['textual', 'visual'],
     'accessModeSufficient': ['textual'],
-    'accessibilityFeature': ['structuralNavigation'],
+    'accessibilityFeature': ['structuralNavigation', 'alternativeText'],
     'accessibilityHazard': ['unknown']
     }
 prefs.defaults['a11y'] = {
@@ -145,7 +145,12 @@ class ConfigWidget(QWidget):
 
         # accessibilityFeature
         self.acc_feat = QLineEdit(self)
-        self.acc_feat.setText(prefs['access']['accessibilityFeature'][0])
+        acc_feat_list = prefs.get('access', {}).get('accessibilityFeature', [])
+        self.acc_feat.setText(' '.join(acc_feat_list))
+        self.acc_feat.setToolTip('schema:accessibilityFeature metadata '
+                                 'propriety. Separate values with space.')
+        self.acc_feat.setPlaceholderText('structuralNavigation '
+                                         'alternativeText')
 
         # accessibilityHazard
         self.acc_hazard_none = QCheckBox('None', self)
@@ -310,7 +315,7 @@ class ConfigWidget(QWidget):
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
             'accessModeSufficient': [access_mode_suff],
-            'accessibilityFeature': [self.acc_feat.text()],
+            'accessibilityFeature': self.acc_feat.text().split(),
             'accessibilityHazard': access_hazard
             }
         prefs['a11y'] = {
