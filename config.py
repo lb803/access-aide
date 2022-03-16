@@ -49,6 +49,33 @@ prefs.defaults['dcterms'] = {
     'conformsTo': ''
 }
 
+
+class Completer(QCompleter):
+
+    def __init__(self, *args, **kwargs):
+        super(Completer, self).__init__(*args, **kwargs)
+        self.setFilterMode(Qt.MatchContains)
+        self.setCaseSensitivity(Qt.CaseInsensitive)
+        self.setCompletionMode(QCompleter.PopupCompletion)
+
+
+    # Add texts instead of replace
+    def pathFromIndex(self, index):
+        path = QCompleter.pathFromIndex(self, index)
+
+        lst = str(self.widget().text()).split(' ')
+
+        if len(lst) > 1:
+            path = '%s %s' % (' '.join(lst[:-1]), path)
+
+        return path
+
+    # Add operator to separate between texts
+    def splitPath(self, path):
+        path = str(path.split(' ')[-1]).lstrip(' ')
+        return [path]
+
+
 class ConfigWidget(QWidget):
 
     def __init__(self):
@@ -61,7 +88,7 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.conform_group(), 2, 0, 1, 2)
         grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
         self.setLayout(grid)
-        
+
     def general_group(self):
         group_box = QGroupBox('General Preferences', self)
 
@@ -155,9 +182,7 @@ class ConfigWidget(QWidget):
                                          'alternativeText')
 
         feat_list = json.loads(get_resources('assets/acc_feature_values.json'))
-        completer = QCompleter(feat_list)
-        completer.setFilterMode(Qt.MatchContains)
-        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer = Completer(feat_list)
         self.acc_feat.setCompleter(completer)
 
         # accessibilityHazard
@@ -257,7 +282,7 @@ class ConfigWidget(QWidget):
 
         forum_button = QPushButton('⌨ Calibre Forum')
         forum_button.clicked.connect(self.forum)
-        
+
         hbox = QHBoxLayout()
         hbox.addStretch(1)
         hbox.addWidget(github_button)
