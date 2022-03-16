@@ -21,7 +21,7 @@ from calibre.customize import EditBookToolPlugin
 
 class AccessAidePlugin(EditBookToolPlugin):
     name = 'Access Aide'
-    version = (0, 1, 11)
+    version = (0, 1, 12)
     author = 'Luca Baffa'
     supported_platforms = ['windows', 'osx', 'linux']
     description = 'Enhance accessibility features in EPUB files.'
