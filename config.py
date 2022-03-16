@@ -43,6 +43,9 @@ prefs.defaults['a11y'] = {
     'certifierCredential': '',
     'certifierReport': ''
 }
+prefs.defaults['dcterms'] = {
+    'conformsTo': ''
+}
 
 class ConfigWidget(QWidget):
 
@@ -200,6 +203,13 @@ class ConfigWidget(QWidget):
         self.a11y_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
         self.a11y_box.setToolTip('Enable a11y metadata proprieties')
 
+        self.conform_to = QLineEdit(prefs.get('dcterms', {}) \
+                                    .get('conformsTo', ''))
+        self.conform_to.setToolTip('dcterms:conformsTo metadata propriety')
+        self.conform_to.setPlaceholderText('http://www.idpf.org/epub/a11y/'
+                                           'accessibility-20170105.html'
+                                           '#wcag-aa')
+
         self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
         self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
         self.a11y_by.setPlaceholderText('Book Company Ltd')
@@ -217,6 +227,7 @@ class ConfigWidget(QWidget):
 
         fbox = QFormLayout()
         fbox.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        fbox.addRow(QLabel('Conformance URL:'), self.conform_to)
         fbox.addRow(QLabel('Certified by:'), self.a11y_by)
         fbox.addRow(QLabel('Certifier Credential:'), self.a11y_credential)
         fbox.addRow(QLabel('Report URL:'), self.a11y_report)
@@ -308,3 +319,6 @@ class ConfigWidget(QWidget):
             'certifierCredential': self.a11y_credential.text(),
             'certifierReport': self.a11y_report.text()
             }
+        prefs['dcterms'] = {
+            'conformsTo': self.conform_to.text()
+        }
