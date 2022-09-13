@@ -60,7 +60,7 @@ class AccessAide(Tool):
         return ac
 
     def prompt_config(self):
-        self.conf = ConfigWidget()
+        self.conf = ConfigWidget(standalone=True)
         self.conf.show()
 
     def main(self):

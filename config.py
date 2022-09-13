@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter, QDialogButtonBox
 from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
@@ -78,7 +78,7 @@ class Completer(QCompleter):
 
 class ConfigWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, standalone=None):
         QWidget.__init__(self)
 
         grid = QGridLayout()
@@ -87,6 +87,8 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
         grid.addWidget(self.conform_group(), 2, 0, 1, 2)
         grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
+        if standalone is not None:
+            grid.addWidget(self.button_box(), 4, 0, 1, 2)
         self.setLayout(grid)
 
     def general_group(self):
@@ -296,6 +298,23 @@ class ConfigWidget(QWidget):
 
     def forum(self):
         webbrowser.open('https://www.mobileread.com/forums/showthread.php?t=337132')
+
+    def button_box(self):
+        Btn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        buttonBox = QDialogButtonBox(Btn)
+        buttonBox.accepted.connect(self.accepted)
+        buttonBox.rejected.connect(self.rejected)
+
+        return buttonBox
+
+    def accepted(self):
+        # self.save_settings()
+        # read about signals and slots
+        self.close()
+
+    def rejected(self):
+        self.close()
 
     def save_settings(self):
 
