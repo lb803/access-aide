@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import lxml.etree
 import json
-from PyQt5.Qt import QAction
+from PyQt5.Qt import QAction, QGroupBox
 
 # The base class that all tools must inherit from
 from calibre.gui2.tweak_book.plugin import Tool
@@ -32,6 +32,7 @@ from calibre_plugins.access_aide.config import prefs
 
 # My modules
 from .lib.stats import Stats
+from .config import ConfigWidget
 
 
 class AccessAide(Tool):
@@ -55,8 +56,12 @@ class AccessAide(Tool):
             self.register_shortcut(ac, 'access-aide-tool',
                                    default_keys=('Ctrl+Shift+A',))
 
-        ac.triggered.connect(self.main)
+        ac.triggered.connect(self.prompt_config)
         return ac
+
+    def prompt_config(self):
+        self.conf = ConfigWidget()
+        self.conf.show()
 
     def main(self):
         # create a restore point
