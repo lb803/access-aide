@@ -284,7 +284,7 @@ class ConfigWidget(QDialog):
         self.close()
 
     def reject(self):
-        self.close()
+        super().reject()
 
     def save_settings(self):
 
