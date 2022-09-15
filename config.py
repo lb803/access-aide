@@ -113,20 +113,15 @@ class ConfigWidget(QDialog):
         self.title_override.setToolTip('When checked, replaces '
                                        'the existing <title> text with'
                                        'the first <h1> found on the page')
-        try:
-            self.title_override \
-                .setChecked(prefs['heuristic']['title_override'])
-        except KeyError:
-            self.title_override.setChecked(False)
+        self.title_override.setChecked(prefs.get('heuristic', {}) \
+                                            .get('title_override', False))
 
         self.type_fn = QCheckBox('Add epub:type to footnote and endnote '
                                  'marks', self)
         self.type_fn.setToolTip('When checked, adds corresponding epub:type '
                                 'to footnote and endnote marks.')
-        try:
-            self.type_fn.setChecked(prefs['heuristic']['type_footnotes'])
-        except KeyError:
-            self.type_fn.setChecked(False)
+        self.type_fn.setChecked(prefs.get('heuristic', {}) \
+                                     .get('type_footnotes', False))
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.title_override)
