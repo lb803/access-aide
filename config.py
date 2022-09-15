@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter, QDialogButtonBox
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter, QDialogButtonBox, QDialog
 from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
@@ -76,7 +76,7 @@ class Completer(QCompleter):
         return [path]
 
 
-class ConfigWidget(QWidget):
+class ConfigWidget(QDialog):
 
     def __init__(self, standalone=None):
         QWidget.__init__(self)
@@ -303,17 +303,17 @@ class ConfigWidget(QWidget):
         Btn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         buttonBox = QDialogButtonBox(Btn)
-        buttonBox.accepted.connect(self.accepted)
-        buttonBox.rejected.connect(self.rejected)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
 
         return buttonBox
 
-    def accepted(self):
-        # self.save_settings()
-        # read about signals and slots
+    def accept(self):
+        self.save_settings()
+        super().accept()
         self.close()
 
-    def rejected(self):
+    def reject(self):
         self.close()
 
     def save_settings(self):
@@ -379,3 +379,5 @@ class ConfigWidget(QWidget):
         prefs['dcterms'] = {
             'conformsTo': self.conform_to.text()
         }
+
+        self.prefs = prefs
