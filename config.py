@@ -97,7 +97,7 @@ class ConfigWidget(QDialog):
         self.force_override.setToolTip('When checked, existing HTML '
                                        'attributes and values will be '
                                        'overwritten.')
-        self.force_override.setChecked(prefs['force_override'])
+        self.force_override.setChecked(prefs.get('force_override', False))
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.force_override)
