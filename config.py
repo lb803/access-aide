@@ -17,7 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter, QDialogButtonBox, QDialog
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox,
+                     QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout,
+                     QPushButton, QIcon, QPixmap, QCompleter, QDialogButtonBox,
+                     QDialog
 from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
@@ -281,7 +284,6 @@ class ConfigWidget(QDialog):
     def accept(self):
         self.save_settings()
         super().accept()
-        self.close()
 
     def reject(self):
         super().reject()
