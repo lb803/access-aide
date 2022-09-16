@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import lxml.etree
 import json
-from PyQt5.Qt import QAction
+from PyQt5.Qt import QAction, QGroupBox
 
 # The base class that all tools must inherit from
 from calibre.gui2.tweak_book.plugin import Tool
@@ -28,10 +28,9 @@ from calibre import force_unicode
 from calibre.gui2 import error_dialog, info_dialog
 from calibre.ebooks.oeb.base import OPF_MIME, OEB_DOCS
 
-from calibre_plugins.access_aide.config import prefs
-
 # My modules
 from .lib.stats import Stats
+from .config import ConfigWidget
 
 
 class AccessAide(Tool):
@@ -55,8 +54,15 @@ class AccessAide(Tool):
             self.register_shortcut(ac, 'access-aide-tool',
                                    default_keys=('Ctrl+Shift+A',))
 
-        ac.triggered.connect(self.main)
+        ac.triggered.connect(self.prompt_config)
         return ac
+
+    def prompt_config(self):
+        self.conf = ConfigWidget(standalone=True)
+
+        if self.conf.exec_():
+            self.prefs = self.conf.prefs
+            self.main()
 
     def main(self):
         # create a restore point
@@ -85,9 +91,9 @@ class AccessAide(Tool):
             if media_type in OEB_DOCS \
                and name not in blacklist:
 
-                if prefs.get('heuristic', {}).get('title_override'):
+                if self.prefs.get('heuristic', {}).get('title_override'):
                     self.override_title(container.parsed(name))
-                if prefs.get('heuristic', {}).get('type_footnotes'):
+                if self.prefs.get('heuristic', {}).get('type_footnotes'):
                     self.add_fn_type(container.parsed(name))
 
                 self.add_lang(container.parsed(name),
@@ -97,8 +103,7 @@ class AccessAide(Tool):
             elif media_type in OPF_MIME:
                 self.add_metadata(container)
 
-                if prefs.get('a11y', {}).get('enabled'):
-                    self.add_a11y(container)
+                self.add_a11y(container)
 
             else:
                 continue
@@ -240,7 +245,7 @@ class AccessAide(Tool):
         or if node is not present.
         '''
 
-        if prefs.get('force_override') \
+        if self.prefs.get('force_override') \
            or attribute not in node.attrib:
 
             node.attrib[attribute] = value
@@ -256,7 +261,7 @@ class AccessAide(Tool):
         or if node text differs.
         '''
 
-        if prefs.get('force_override') \
+        if self.prefs.get('force_override') \
            or ''.join(node.itertext()) != value:
 
             node.text = value
@@ -276,9 +281,9 @@ class AccessAide(Tool):
                 self.aria_stat.report(),
                 self.meta_stat.report()]
 
-        if prefs.get('heuristic', {}).get('title_override'):
+        if self.prefs.get('heuristic', {}).get('title_override'):
             data.append(self.title_stat.report())
-        if prefs.get('heuristic', {}).get('type_footnotes'):
+        if self.prefs.get('heuristic', {}).get('type_footnotes'):
             data.append(self.fn_stat.report())
 
         return '<h3>Routine completed</h3><p>{}</p>'.format('<br>'.join(data))
@@ -293,7 +298,7 @@ class AccessAide(Tool):
 
         metadata = container.opf_xpath('//opf:metadata')[0]
 
-        meta = prefs.get('access')
+        meta = self.prefs.get('access')
 
         for value in meta:
 
@@ -303,7 +308,7 @@ class AccessAide(Tool):
                 if container.opf_version_parsed.major == 3:
 
                     # prevent overriding
-                    if prefs.get('force_override') \
+                    if self.prefs.get('force_override') \
                        or not container.opf_xpath(
                            '''
                            //*[contains(@property, "{}")
@@ -322,7 +327,7 @@ class AccessAide(Tool):
                 elif container.opf_version_parsed.major == 2:
 
                     # prevent overriding
-                    if prefs.get('force_override') \
+                    if self.prefs.get('force_override') \
                        or not container.opf_xpath(
                            '''
                            //*[contains(@name, "{}")
@@ -345,13 +350,13 @@ class AccessAide(Tool):
         '''
         metadata = container.opf_xpath('//opf:metadata')[0]
 
-        conforms_to = prefs.get('dcterms', {}).get('conformsTo')
+        conforms_to = self.prefs.get('dcterms', {}).get('conformsTo')
         if conforms_to:
             # if epub3
             if container.opf_version_parsed.major == 3:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@rel, "{}")]'
                                               .format('dcterms:conformsTo')):
 
@@ -366,7 +371,7 @@ class AccessAide(Tool):
             elif container.opf_version_parsed.major == 2:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@name, "{}")]'
                                               .format('dcterms:conformsTo')):
 
@@ -377,13 +382,13 @@ class AccessAide(Tool):
 
                     container.insert_into_xml(metadata, element)
 
-        certifiedBy = prefs.get('a11y', {}).get('certifiedBy')
+        certifiedBy = self.prefs.get('a11y', {}).get('certifiedBy')
         if certifiedBy:
             # if epub3
             if container.opf_version_parsed.major == 3:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@property, "{}")]'
                                               .format('a11y:certifiedBy')):
 
@@ -397,7 +402,7 @@ class AccessAide(Tool):
             elif container.opf_version_parsed.major == 2:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@name, "{}")]'
                                               .format('a11y:certifiedBy')):
 
@@ -409,13 +414,13 @@ class AccessAide(Tool):
 
                     container.insert_into_xml(metadata, element)
 
-        certifierCred = prefs.get('a11y', {}).get('certifierCredential')
+        certifierCred = self.prefs.get('a11y', {}).get('certifierCredential')
         if certifierCred:
             # if epub3
             if container.opf_version_parsed.major == 3:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@property, "{}")]'
                                          .format('a11y:certifierCredential')):
 
@@ -431,7 +436,7 @@ class AccessAide(Tool):
             elif container.opf_version_parsed.major == 2:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@name, "{}")]'
                                         .format('a11y:certifierCredential')):
 
@@ -443,13 +448,13 @@ class AccessAide(Tool):
 
                     container.insert_into_xml(metadata, element)
 
-        certifierRep = prefs.get('a11y', {}).get('certifierReport')
+        certifierRep = self.prefs.get('a11y', {}).get('certifierReport')
         if certifierRep:
             # if epub3
             if container.opf_version_parsed.major == 3:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@rel, "{}")]'
                                               .format('a11y:certifierReport')):
 
@@ -465,7 +470,7 @@ class AccessAide(Tool):
             elif container.opf_version_parsed.major == 2:
 
                 # prevent overriding
-                if prefs.get('force_override') \
+                if self.prefs.get('force_override') \
                    or not container.opf_xpath('//*[contains(@name, "{}")]'
                                         .format('a11y:certifierReport')):
 

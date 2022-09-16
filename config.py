@@ -17,37 +17,49 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, QGridLayout, QPushButton, QIcon, QPixmap, QCompleter
+from PyQt5.Qt import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, \
+                     QCheckBox, QGroupBox, QLabel, QLineEdit, QRadioButton, \
+                     QGridLayout, QPushButton, QIcon, QPixmap, QCompleter, \
+                     QDialogButtonBox, QDialog
 from PyQt5.QtCore import Qt
 from calibre.utils.config import JSONConfig
 
 import webbrowser
 import json
 
-prefs = JSONConfig('plugins/access_aide')
 
-# Set defaults
-prefs.defaults['force_override'] = False
-prefs.defaults['heuristic'] = {
-    'title_override': False,
-    'type_footnotes': False
+class Config():
+    """Class to store/retrieve preference data within Calibre"""
+
+    DEFAULTS = {
+        "force_override": False,
+        "heuristic": {"title_override": False, "type_footnotes": False},
+        "access": {
+            "accessibilitySummary": ["This publication conforms to WCAG 2.0 AA."],
+            "accessMode": ["textual", "visual"],
+            "accessModeSufficient": ["textual"],
+            "accessibilityFeature": ["structuralNavigation", "alternativeText"],
+            "accessibilityHazard": ["unknown"],
+        },
+        "a11y": {
+            "enabled": False,
+            "certifiedBy": "",
+            "certifierCredential": "",
+            "certifierReport": "",
+        },
+        "dcterms": {"conformsTo": ""},
     }
-prefs.defaults['access'] = {
-    'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
-    'accessMode': ['textual', 'visual'],
-    'accessModeSufficient': ['textual'],
-    'accessibilityFeature': ['structuralNavigation', 'alternativeText'],
-    'accessibilityHazard': ['unknown']
-    }
-prefs.defaults['a11y'] = {
-    'enabled': False,
-    'certifiedBy': '',
-    'certifierCredential': '',
-    'certifierReport': ''
-}
-prefs.defaults['dcterms'] = {
-    'conformsTo': ''
-}
+
+    def __init__(self):
+        self.prefs = JSONConfig('plugins/access_aide')
+        if not self.prefs:
+            self.prefs.defaults = self.DEFAULTS
+
+    def get_prefs(self):
+        return self.prefs
+
+    def store_prefs(self, prefs):
+        self.prefs = prefs
 
 
 class Completer(QCompleter):
@@ -76,9 +88,12 @@ class Completer(QCompleter):
         return [path]
 
 
-class ConfigWidget(QWidget):
+class ConfigWidget(QDialog):
 
-    def __init__(self):
+    def __init__(self, standalone=None):
+        self.config = Config()
+        self.prefs = self.config.get_prefs()
+
         QWidget.__init__(self)
 
         grid = QGridLayout()
@@ -86,7 +101,8 @@ class ConfigWidget(QWidget):
         grid.addWidget(self.heuristic_group(), 0, 1, 1, 1)
         grid.addWidget(self.access_group(), 1, 0, 1, 2)
         grid.addWidget(self.conform_group(), 2, 0, 1, 2)
-        grid.addLayout(self.buttons_group(), 3, 0, 1, 2)
+        if standalone is not None:
+            grid.addWidget(self.button_box(), 3, 0, 1, 2)
         self.setLayout(grid)
 
     def general_group(self):
@@ -96,7 +112,7 @@ class ConfigWidget(QWidget):
         self.force_override.setToolTip('When checked, existing HTML '
                                        'attributes and values will be '
                                        'overwritten.')
-        self.force_override.setChecked(prefs['force_override'])
+        self.force_override.setChecked(self.prefs.get('force_override', False))
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.force_override)
@@ -112,20 +128,15 @@ class ConfigWidget(QWidget):
         self.title_override.setToolTip('When checked, replaces '
                                        'the existing <title> text with'
                                        'the first <h1> found on the page')
-        try:
-            self.title_override \
-                .setChecked(prefs['heuristic']['title_override'])
-        except KeyError:
-            self.title_override.setChecked(False)
+        self.title_override.setChecked(self.prefs.get('heuristic', {}) \
+                                            .get('title_override', False))
 
         self.type_fn = QCheckBox('Add epub:type to footnote and endnote '
                                  'marks', self)
         self.type_fn.setToolTip('When checked, adds corresponding epub:type '
                                 'to footnote and endnote marks.')
-        try:
-            self.type_fn.setChecked(prefs['heuristic']['type_footnotes'])
-        except KeyError:
-            self.type_fn.setChecked(False)
+        self.type_fn.setChecked(self.prefs.get('heuristic', {}) \
+                                     .get('type_footnotes', False))
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.title_override)
@@ -140,17 +151,17 @@ class ConfigWidget(QWidget):
 
         # accessibilitySummary
         self.acc_summ = QLineEdit(self)
-        self.acc_summ.setText(prefs['access']['accessibilitySummary'][0])
+        self.acc_summ.setText(self.prefs['access']['accessibilitySummary'][0])
 
         # accessMode
         self.acc_mode_t = QCheckBox('Textual', self)
-        if 'textual' in prefs['access']['accessMode']:
+        if 'textual' in self.prefs['access']['accessMode']:
             self.acc_mode_t.setChecked(True)
         else:
             self.acc_mode_t.setChecked(False)
 
         self.acc_mode_v = QCheckBox('Visual', self)
-        if 'visual' in prefs['access']['accessMode']:
+        if 'visual' in self.prefs['access']['accessMode']:
             self.acc_mode_v.setChecked(True)
         else:
             self.acc_mode_v.setChecked(False)
@@ -161,11 +172,11 @@ class ConfigWidget(QWidget):
 
         # accessModeSufficient
         self.acc_suff_t = QRadioButton('Textual')
-        if 'textual' in prefs['access']['accessModeSufficient']:
+        if 'textual' in self.prefs['access']['accessModeSufficient']:
             self.acc_suff_t.setChecked(True)
 
         self.acc_suff_v = QRadioButton('Visual')
-        if 'visual' in prefs['access']['accessModeSufficient']:
+        if 'visual' in self.prefs['access']['accessModeSufficient']:
             self.acc_suff_v.setChecked(True)
 
         acc_suff_box = QVBoxLayout()
@@ -174,7 +185,7 @@ class ConfigWidget(QWidget):
 
         # accessibilityFeature
         self.acc_feat = QLineEdit(self)
-        acc_feat_list = prefs.get('access', {}).get('accessibilityFeature', [])
+        acc_feat_list = self.prefs.get('access', {}).get('accessibilityFeature', [])
         self.acc_feat.setText(' '.join(acc_feat_list))
         self.acc_feat.setToolTip('schema:accessibilityFeature metadata '
                                  'propriety. Separate values with space.')
@@ -187,35 +198,40 @@ class ConfigWidget(QWidget):
 
         # accessibilityHazard
         self.acc_hazard_none = QCheckBox('None', self)
-        if 'none' in prefs['access'].get('accessibilityHazard', []):
+        if 'none' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_none.setChecked(True)
         else:
             self.acc_hazard_none.setChecked(False)
+        self.acc_hazard_none.clicked.connect(self.acc_hazard_none_clicked)
 
         self.acc_hazard_unknown = QCheckBox('Unknown', self)
-        if 'unknown' in prefs['access'].get('accessibilityHazard', []):
+        if 'unknown' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_unknown.setChecked(True)
         else:
             self.acc_hazard_unknown.setChecked(False)
+        self.acc_hazard_unknown.clicked.connect(self.acc_hazard_unknown_clicked)
 
         self.acc_hazard_f = QCheckBox('Flashing', self)
-        if 'flashing' in prefs['access'].get('accessibilityHazard', []):
+        if 'flashing' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_f.setChecked(True)
         else:
             self.acc_hazard_f.setChecked(False)
+        self.acc_hazard_f.clicked.connect(self.acc_hazard_clicked)
 
         self.acc_hazard_m = QCheckBox('Motion Simulation', self)
-        if 'motionSimulation' in prefs['access'] \
+        if 'motionSimulation' in self.prefs['access'] \
                                  .get('accessibilityHazard', []):
             self.acc_hazard_m.setChecked(True)
         else:
             self.acc_hazard_m.setChecked(False)
+        self.acc_hazard_m.clicked.connect(self.acc_hazard_clicked)
 
         self.acc_hazard_s = QCheckBox('Sound', self)
-        if 'sound' in prefs['access'].get('accessibilityHazard', []):
+        if 'sound' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_s.setChecked(True)
         else:
             self.acc_hazard_s.setChecked(False)
+        self.acc_hazard_s.clicked.connect(self.acc_hazard_clicked)
 
         acc_hazard_box = QVBoxLayout()
         acc_hazard_box.addWidget(self.acc_hazard_none)
@@ -235,30 +251,48 @@ class ConfigWidget(QWidget):
 
         return group_box
 
+    def acc_hazard_none_clicked(self):
+        if self.acc_hazard_none.isChecked() is True:
+            self.acc_hazard_unknown.setChecked(False)
+            self.acc_hazard_f.setChecked(False)
+            self.acc_hazard_m.setChecked(False)
+            self.acc_hazard_s.setChecked(False)
+
+    def acc_hazard_unknown_clicked(self):
+        if self.acc_hazard_unknown.isChecked() is True:
+            self.acc_hazard_none.setChecked(False)
+            self.acc_hazard_f.setChecked(False)
+            self.acc_hazard_m.setChecked(False)
+            self.acc_hazard_s.setChecked(False)
+
+    def acc_hazard_clicked(self):
+        if any([self.acc_hazard_f.isChecked(), \
+                self.acc_hazard_m.isChecked(), \
+                self.acc_hazard_s.isChecked()]):
+            self.acc_hazard_unknown.setChecked(False)
+            self.acc_hazard_none.setChecked(False)
+
     def conform_group(self):
         self.conform_box = QGroupBox('Conformance Properties', self)
-        self.conform_box.setCheckable(True)
-        self.conform_box.setChecked(prefs.get('a11y', {}).get('enabled', False))
-        self.conform_box.setToolTip('Enable conformance metadata proprieties')
 
-        self.conform_to = QLineEdit(prefs.get('dcterms', {}) \
+        self.conform_to = QLineEdit(self.prefs.get('dcterms', {}) \
                                     .get('conformsTo', ''))
         self.conform_to.setToolTip('dcterms:conformsTo metadata propriety')
         self.conform_to.setPlaceholderText('http://www.idpf.org/epub/a11y/'
                                            'accessibility-20170105.html'
                                            '#wcag-aa')
 
-        self.a11y_by = QLineEdit(prefs.get('a11y', {}).get('certifiedBy', ''))
+        self.a11y_by = QLineEdit(self.prefs.get('a11y', {}).get('certifiedBy', ''))
         self.a11y_by.setToolTip('a11y:certifiedBy metadata propriety')
         self.a11y_by.setPlaceholderText('Book Company Ltd')
 
-        self.a11y_credential = QLineEdit(prefs.get('a11y', {}) \
+        self.a11y_credential = QLineEdit(self.prefs.get('a11y', {}) \
                                               .get('certifierCredential', ''))
         self.a11y_credential.setToolTip('a11y:certifierCredential metadata '
                                         'propriety')
         self.a11y_credential.setPlaceholderText('DAISY OK')
 
-        self.a11y_report = QLineEdit(prefs.get('a11y', {}) \
+        self.a11y_report = QLineEdit(self.prefs.get('a11y', {}) \
                                           .get('certifierReport', ''))
         self.a11y_report.setToolTip('a11y:certifierReport metadata propriety')
         self.a11y_report.setPlaceholderText('https://www.link.to/report.html')
@@ -273,31 +307,23 @@ class ConfigWidget(QWidget):
 
         return self.conform_box
 
-    def buttons_group(self):
-        github_button = QPushButton('Source code')
-        github_button.clicked.connect(self.github)
-        github_logo = QPixmap()
-        github_logo.loadFromData(get_resources('icon/GitHub-Mark-32px.png'))
-        github_button.setIcon(QIcon(github_logo))
+    def button_box(self):
+        Btn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
-        forum_button = QPushButton('⌨ Calibre Forum')
-        forum_button.clicked.connect(self.forum)
+        buttonBox = QDialogButtonBox(Btn)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
 
-        hbox = QHBoxLayout()
-        hbox.addStretch(1)
-        hbox.addWidget(github_button)
-        hbox.addWidget(forum_button)
-        hbox.addStretch(1)
+        return buttonBox
 
-        return hbox
+    def accept(self):
+        self.gather_data()
+        super().accept()
 
-    def github(self):
-        webbrowser.open('https://github.com/lb803/access-aide')
+    def reject(self):
+        super().reject()
 
-    def forum(self):
-        webbrowser.open('https://www.mobileread.com/forums/showthread.php?t=337132')
-
-    def save_settings(self):
+    def gather_data(self):
 
         # accessMode
         access_mode = []
@@ -339,24 +365,27 @@ class ConfigWidget(QWidget):
             else:
                 access_hazard.append('noSoundHazard')
 
-        prefs['force_override'] = self.force_override.isChecked()
-        prefs['heuristic'] = {
+        self.prefs['force_override'] = self.force_override.isChecked()
+        self.prefs['heuristic'] = {
             'title_override': self.title_override.isChecked(),
             'type_footnotes': self.type_fn.isChecked()
             }
-        prefs['access'] = {
+        self.prefs['access'] = {
             'accessibilitySummary': [self.acc_summ.text()],
             'accessMode': access_mode,
             'accessModeSufficient': [access_mode_suff],
             'accessibilityFeature': self.acc_feat.text().split(),
             'accessibilityHazard': access_hazard
             }
-        prefs['a11y'] = {
-            'enabled': self.conform_box.isChecked(),
+        self.prefs['a11y'] = {
             'certifiedBy': self.a11y_by.text(),
             'certifierCredential': self.a11y_credential.text(),
             'certifierReport': self.a11y_report.text()
             }
-        prefs['dcterms'] = {
+        self.prefs['dcterms'] = {
             'conformsTo': self.conform_to.text()
         }
+
+    def save_settings(self):
+        self.gather_data()
+        self.config.store_prefs(self.prefs)

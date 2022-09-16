@@ -35,4 +35,4 @@ Exception has been made for `a` and `img` which are considered special cases as:
 These exceptions are hardcoded in the add_aria() method.
 
 # `acc_feature_values.json` file
-This is a list of features which are helpful for accessibility. These can be added as metadata under _accessibilityFeature_.
+This is a list of features which are helpful for accessibility. These can be added as metadata under _accessibilityFeature_. Source of the values: [http://kb.daisy.org/publishing/docs/metadata/schema.org/accessibilityFeature.html](http://kb.daisy.org/publishing/docs/metadata/schema.org/accessibilityFeature.html)
