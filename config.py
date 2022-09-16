@@ -58,6 +58,9 @@ class Config():
     def get_prefs(self):
         return self.prefs
 
+    def store_prefs(self, prefs):
+        self.prefs = prefs
+
 
 class Completer(QCompleter):
 
@@ -291,13 +294,13 @@ class ConfigWidget(QDialog):
         return buttonBox
 
     def accept(self):
-        self.save_settings()
+        self.gather_data()
         super().accept()
 
     def reject(self):
         super().reject()
 
-    def save_settings(self):
+    def gather_data(self):
 
         # accessMode
         access_mode = []
@@ -361,4 +364,6 @@ class ConfigWidget(QDialog):
             'conformsTo': self.conform_to.text()
         }
 
-        self.prefs = prefs
+    def save_settings(self):
+        self.gather_data()
+        self.config.store_prefs(self.prefs)
