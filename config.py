@@ -202,21 +202,21 @@ class ConfigWidget(QDialog):
             self.acc_hazard_none.setChecked(True)
         else:
             self.acc_hazard_none.setChecked(False)
-        self.acc_hazard_none.toggled.connect(self.acc_hazard_none_toggled)
+        self.acc_hazard_none.clicked.connect(self.acc_hazard_none_clicked)
 
         self.acc_hazard_unknown = QCheckBox('Unknown', self)
         if 'unknown' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_unknown.setChecked(True)
         else:
             self.acc_hazard_unknown.setChecked(False)
-        self.acc_hazard_unknown.toggled.connect(self.acc_hazard_unknown_toggled)
+        self.acc_hazard_unknown.clicked.connect(self.acc_hazard_unknown_clicked)
 
         self.acc_hazard_f = QCheckBox('Flashing', self)
         if 'flashing' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_f.setChecked(True)
         else:
             self.acc_hazard_f.setChecked(False)
-        self.acc_hazard_f.toggled.connect(self.acc_hazard_toggled)
+        self.acc_hazard_f.clicked.connect(self.acc_hazard_clicked)
 
         self.acc_hazard_m = QCheckBox('Motion Simulation', self)
         if 'motionSimulation' in self.prefs['access'] \
@@ -224,14 +224,14 @@ class ConfigWidget(QDialog):
             self.acc_hazard_m.setChecked(True)
         else:
             self.acc_hazard_m.setChecked(False)
-        self.acc_hazard_m.toggled.connect(self.acc_hazard_toggled)
+        self.acc_hazard_m.clicked.connect(self.acc_hazard_clicked)
 
         self.acc_hazard_s = QCheckBox('Sound', self)
         if 'sound' in self.prefs['access'].get('accessibilityHazard', []):
             self.acc_hazard_s.setChecked(True)
         else:
             self.acc_hazard_s.setChecked(False)
-        self.acc_hazard_s.toggled.connect(self.acc_hazard_toggled)
+        self.acc_hazard_s.clicked.connect(self.acc_hazard_clicked)
 
         acc_hazard_box = QVBoxLayout()
         acc_hazard_box.addWidget(self.acc_hazard_none)
@@ -251,27 +251,26 @@ class ConfigWidget(QDialog):
 
         return group_box
 
-    def acc_hazard_none_toggled(self):
+    def acc_hazard_none_clicked(self):
         if self.acc_hazard_none.isChecked() is True:
             self.acc_hazard_unknown.setChecked(False)
             self.acc_hazard_f.setChecked(False)
             self.acc_hazard_m.setChecked(False)
             self.acc_hazard_s.setChecked(False)
 
-    def acc_hazard_unknown_toggled(self):
+    def acc_hazard_unknown_clicked(self):
         if self.acc_hazard_unknown.isChecked() is True:
             self.acc_hazard_none.setChecked(False)
             self.acc_hazard_f.setChecked(False)
             self.acc_hazard_m.setChecked(False)
             self.acc_hazard_s.setChecked(False)
 
-    def acc_hazard_toggled(self):
+    def acc_hazard_clicked(self):
         if any([self.acc_hazard_f.isChecked(), \
                 self.acc_hazard_m.isChecked(), \
                 self.acc_hazard_s.isChecked()]):
             self.acc_hazard_unknown.setChecked(False)
             self.acc_hazard_none.setChecked(False)
-
 
     def conform_group(self):
         self.conform_box = QGroupBox('Conformance Properties', self)
