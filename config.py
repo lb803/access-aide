@@ -202,6 +202,7 @@ class ConfigWidget(QDialog):
             self.acc_hazard_none.setChecked(True)
         else:
             self.acc_hazard_none.setChecked(False)
+        self.acc_hazard_none.toggled.connect(self.acc_hazard_none_toggled)
 
         self.acc_hazard_unknown = QCheckBox('Unknown', self)
         if 'unknown' in self.prefs['access'].get('accessibilityHazard', []):
@@ -245,6 +246,13 @@ class ConfigWidget(QDialog):
         group_box.setLayout(fbox)
 
         return group_box
+
+    def acc_hazard_none_toggled(self):
+        if self.acc_hazard_none.isChecked() is True:
+            self.acc_hazard_unknown.setChecked(False)
+            self.acc_hazard_f.setChecked(False)
+            self.acc_hazard_m.setChecked(False)
+            self.acc_hazard_s.setChecked(False)
 
     def conform_group(self):
         self.conform_box = QGroupBox('Conformance Properties', self)
