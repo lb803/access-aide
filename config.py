@@ -31,31 +31,29 @@ import json
 class Config():
     """Class to store/retrieve preference data within Calibre"""
 
+    DEFAULTS = {
+        "force_override": False,
+        "heuristic": {"title_override": False, "type_footnotes": False},
+        "access": {
+            "accessibilitySummary": ["This publication conforms to WCAG 2.0 AA."],
+            "accessMode": ["textual", "visual"],
+            "accessModeSufficient": ["textual"],
+            "accessibilityFeature": ["structuralNavigation", "alternativeText"],
+            "accessibilityHazard": ["unknown"],
+        },
+        "a11y": {
+            "enabled": False,
+            "certifiedBy": "",
+            "certifierCredential": "",
+            "certifierReport": "",
+        },
+        "dcterms": {"conformsTo": ""},
+    }
+
     def __init__(self):
         self.prefs = JSONConfig('plugins/access_aide')
-
-        # Set defaults
-        self.prefs.defaults['force_override'] = False
-        self.prefs.defaults['heuristic'] = {
-            'title_override': False,
-            'type_footnotes': False
-            }
-        self.prefs.defaults['access'] = {
-            'accessibilitySummary': ['This publication conforms to WCAG 2.0 AA.'],
-            'accessMode': ['textual', 'visual'],
-            'accessModeSufficient': ['textual'],
-            'accessibilityFeature': ['structuralNavigation', 'alternativeText'],
-            'accessibilityHazard': ['unknown']
-            }
-        self.prefs.defaults['a11y'] = {
-            'enabled': False,
-            'certifiedBy': '',
-            'certifierCredential': '',
-            'certifierReport': ''
-        }
-        self.prefs.defaults['dcterms'] = {
-            'conformsTo': ''
-        }
+        if not self.prefs:
+            self.prefs.defaults = self.DEFAULTS
 
     def get_prefs(self):
         return self.prefs
