@@ -274,9 +274,6 @@ class ConfigWidget(QDialog):
 
     def conform_group(self):
         self.conform_box = QGroupBox('Conformance Properties', self)
-        self.conform_box.setCheckable(True)
-        self.conform_box.setChecked(self.prefs.get('a11y', {}).get('enabled', False))
-        self.conform_box.setToolTip('Enable conformance metadata proprieties')
 
         self.conform_to = QLineEdit(self.prefs.get('dcterms', {}) \
                                     .get('conformsTo', ''))
@@ -381,7 +378,6 @@ class ConfigWidget(QDialog):
             'accessibilityHazard': access_hazard
             }
         self.prefs['a11y'] = {
-            'enabled': self.conform_box.isChecked(),
             'certifiedBy': self.a11y_by.text(),
             'certifierCredential': self.a11y_credential.text(),
             'certifierReport': self.a11y_report.text()

@@ -103,8 +103,7 @@ class AccessAide(Tool):
             elif media_type in OPF_MIME:
                 self.add_metadata(container)
 
-                if self.prefs.get('a11y', {}).get('enabled'):
-                    self.add_a11y(container)
+                self.add_a11y(container)
 
             else:
                 continue
