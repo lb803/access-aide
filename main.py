@@ -101,8 +101,9 @@ class AccessAide(Tool):
                 self.add_aria(container.parsed(name))
 
             elif media_type in OPF_MIME:
+                self.add_lang_opf(container.parsed(name),
+                              self.get_lang(container))
                 self.add_metadata(container)
-
                 self.add_a11y(container)
 
             else:
@@ -152,6 +153,25 @@ class AccessAide(Tool):
 
         # set lang for 'xml:lang' attribute
         self.write_attrib(html, '{http://www.w3.org/XML/1998/namespace}lang',
+                          lang, self.lang_stat)
+
+    def add_lang_opf(self, root, lang):
+        '''Add language attributes to <package> tag in the `content.opf` file.
+
+        This method finds the <package> tag of the given 'root' element
+        and adds a 'xml:lang' language declarations. Changes are tracked and
+        successes increase a stat counter.
+
+        Note: the 'xml:lang' attribute of the <package> note is set to the
+        book language value defined in the OPF file (<dc:language>).
+        This would not be appropriate in the case where the book is written
+        in a language different from the one used in the `content.opf` file.
+        '''
+
+        pkg = root.xpath('//*[local-name()="package"]')[0]
+
+        # set lang for 'xml:lang' attribute
+        self.write_attrib(pkg, '{http://www.w3.org/XML/1998/namespace}lang',
                           lang, self.lang_stat)
 
     def add_aria(self, root):
