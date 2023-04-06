@@ -68,7 +68,11 @@ class Completer(QCompleter):
         super(Completer, self).__init__(*args, **kwargs)
         self.setFilterMode(Qt.MatchContains)
         self.setCaseSensitivity(Qt.CaseInsensitive)
-        self.setCompletionMode(QCompleter.PopupCompletion)
+        try:
+            self.setCompletionMode(QCompleter.PopupCompletion)
+        except AttributeError:
+            # running calibre v 6.x.x or greater
+            self.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
 
 
     # Add texts instead of replace
